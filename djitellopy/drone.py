@@ -6,7 +6,7 @@ class Drone:
 	myDrone = Tello()
 
 	def __init__(self):
-	# 	myDrone = Tello()
+		
 		self.myDrone.connect()
 		self.myDrone.for_back_velocity = 0
 		self.myDrone.left_right_velocity = 0
