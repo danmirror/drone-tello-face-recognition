@@ -22,17 +22,6 @@ win.geometry("790x485")
 win.title("Face Tracking & Recognition")
 win.resizable(0,0)
 
-recognizer = cv2.face.LBPHFaceRecognizer_create()
-recognizer.read('trainer/trainer3.yml')
-
-cascadePath = pathlib.Path(cv2.__file__).parent.absolute()/"data/haarcascade_frontalface_default.xml"
-faceCascade = cv2.CascadeClassifier(str(cascadePath))
-
-font = cv2.FONT_HERSHEY_SIMPLEX
-id = 0
-jalan = False
-
-
 bg = Image.open("ui_data/bg.png")
 bg_resize = bg.resize((800,480))
 bg_img = ImageTk.PhotoImage(bg_resize)
@@ -69,18 +58,33 @@ label_x.place(x=660 , y=180)
 label_y = ttk.Label(text="Y =", background ="#FFFFFF")
 label_y.place(x=660 , y=230)
 
+x_dis = Entry(
+    win,
+    width=8,
+    font=('Arial', 14),
+    textvariable=selectedX,
+    )
+x_dis.place(x=680, y=180)
 
-
+y_dis = Entry(
+    win,
+    width=8,
+    font=('Arial', 14),
+    textvariable=selectedY,
+    )
+y_dis.place(x=680, y=230)
 
 def Tracking():
 	def show_frames():
 		status = 1
 		if status == 1:
-			# arduino = serial.Serial(port_list[port],baut_list[baut])
+			
 			frame = face_rec.get_frame( w, h)
-			frame, status = face_rec.find_face(frame, faceCascade, comb_index, recognizer)
+			frame, status, info = face_rec.find_face(frame, comb_index, selectedX, selectedY)
 			if(not status):
 				pass
+
+			myDrone.tracking_face(info, w, pid, pError)
 
 			img = Image.fromarray(frame)
 			imgtk = ImageTk.PhotoImage(image=img)
