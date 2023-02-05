@@ -13,7 +13,12 @@ myDrone = Drone()
 face_rec = Face_Recognition()
 
 w, h = 640, 480
-pid = [0.4, 0.4, 0]
+
+# PID
+kp = 0.1
+ki = 0.02
+kd = 0.005
+pid = [kp, ki, kd]
 pError = 0
 
 
@@ -75,27 +80,35 @@ y_dis = Entry(
 y_dis.place(x=680, y=230)
 
 def Tracking():
-	def show_frames():
-		status = 1
-		if status == 1:
-			
-			frame = face_rec.get_frame( w, h)
-			frame, status, info = face_rec.find_face(frame, comb_index, selectedX, selectedY)
-			if(not status):
-				pass
+    def show_frames():
+        global pError
+        status = 1
+        if status == 1:
 
-			myDrone.tracking_face(info, w, pid, pError)
+            frame = myDrone.get_frame( w, h)
+            img , info = face_rec.find_face_all(frame)
+            # frame, status, info = face_rec.find_face(frame, comb_index, selectedX, selectedY)
+            # if(not status):
+            # 	pass
+            
+            # pError = face_rec.face_tracking(info, w, pid, pError)
+            pError = myDrone.tracking_face(info, w, pid, pError)
 
-			img = Image.fromarray(frame)
-			imgtk = ImageTk.PhotoImage(image=img)
-			label.imgtk = imgtk
-			label.configure(image=imgtk, background="#FFFFFF")
-			label.after(10, show_frames)
-		else:
-			print("Pilih Port dan Baut rate")
-			label.after(10, show_frames)
+            img = Image.fromarray(frame)
+            imgtk = ImageTk.PhotoImage(image=img)
+            label.imgtk = imgtk
+            label.configure(image=imgtk, background="#FFFFFF")
+            label.after(10, show_frames)
 
-	show_frames()
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                myDrone.land()
+                printf("closed")
+                # break
+        else:
+            print("Pilih Port dan Baut rate")
+            label.after(10, show_frames)
+
+    show_frames()
 
 # Button for Tracking
 tracking_button = Button(win, text="Tracking", height=1, width=10,
@@ -107,7 +120,10 @@ tracking_button.place(x=660, y=400)
 
 
 def Close():
+    printf("closed")
+    myDrone.land()
     win.destroy()
+
 # Button for closing
 exit_button = Button(win, text="Exit", height=1, width=10,
                           bg='#F2B830',

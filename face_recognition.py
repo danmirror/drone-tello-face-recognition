@@ -123,7 +123,7 @@ def Tracking():
                 x1_text = str(x1_pos)
                 y1_text = str(y1_pos)
 
-                if id == names[1] :#and index == 0:  # Alim
+                if id == names[1] and index == 0:  # Alim
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     cv2.putText(frame, str(id), (x + 5, y - 5), font, 1, (255, 255, 255), 2)
                     cv2.putText(frame, str(confidence), (x + 5, y + h - 5), font, 1, (255, 255, 0), 1)
@@ -132,7 +132,7 @@ def Tracking():
                     string = 'X{0:d}Y{1:d}'.format(x_pos, y_pos)
                     # arduino.write(string.encode('utf-8',errors="ignore"))
 
-                if id == names[2] :#and index == 1:  # Matthew
+                if id == names[2] and index == 1:  # Matthew
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     cv2.putText(frame, str(id), (x + 5, y - 5), font, 1, (255, 255, 255), 2)
                     cv2.putText(frame, str(confidence), (x + 5, y + h - 5), font, 1, (255, 255, 0), 1)
@@ -141,7 +141,7 @@ def Tracking():
                     string = 'X{0:d}Y{1:d}'.format(x_pos, y_pos)
                     # arduino.write(string.encode('utf-8',errors="ignore"))
 
-                if id == names[3] :#and index == 2:  # Dian
+                if id == names[3] and index == 2:  # Dian
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     cv2.putText(frame, str(id), (x + 5, y - 5), font, 1, (255, 255, 255), 2)
                     cv2.putText(frame, str(confidence), (x + 5, y + h - 5), font, 1, (255, 255, 0), 1)
@@ -150,7 +150,7 @@ def Tracking():
                     string = 'X{0:d}Y{1:d}'.format(x_pos, y_pos)
                     # arduino.write(string.encode('utf-8',errors="ignore"))
 
-                if id == names[4] :#and index == 3:  # Yossi
+                if id == names[4] and index == 3:  # Yossi
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     cv2.putText(frame, str(id), (x + 5, y - 5), font, 1, (255, 255, 255), 2)
                     cv2.putText(frame, str(confidence), (x + 5, y + h - 5), font, 1, (255, 255, 0), 1)
@@ -159,7 +159,7 @@ def Tracking():
                     string = 'X{0:d}Y{1:d}'.format(x_pos, y_pos)
                     # arduino.write(string.encode('utf-8',errors="ignore"))
 
-                if id == names[5] :#and index == 4:  # Fahmizal
+                if id == names[5] and index == 4:  # Fahmizal
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     cv2.putText(frame, str(id), (x + 5, y - 5), font, 1, (255, 255, 255), 2)
                     cv2.putText(frame, str(confidence), (x + 5, y + h - 5), font, 1, (255, 255, 0), 1)

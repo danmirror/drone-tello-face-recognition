@@ -1,10 +1,10 @@
 from . import Tello
 import pathlib
 import cv2
+import numpy as np
 
 class Face_Recognition:
-	# cap= cv2.VideoCapture(0)
-	myDrone = Tello()
+	cap= cv2.VideoCapture(0)
 
 	names = ['None', 'Dian', 'Yossi',"Fahmizal","Alim", "Matthew"]
 	recognizer = cv2.face.LBPHFaceRecognizer_create()
@@ -15,17 +15,40 @@ class Face_Recognition:
 	faceCascade = cv2.CascadeClassifier(str(cascadePath))
 
 	font = cv2.FONT_HERSHEY_SIMPLEX
+	
+	integral = 0
 
 	def __init__(self):
 		print("Initial Face")
 
 
 	def get_frame(self, w, h):
-		frame = self.myDrone.get_frame_read().frame
 		# ret, frame = self.cap.read()
-		# frame = cv2.flip(frame, 1)
+		frame = cv2.flip(frame, 1)
 		frame = cv2.resize(frame, (w, h))
 		return frame
+	
+	def find_face_all(self, frame):
+		faceCascade = cv2.CascadeClassifier('trainer/cascadeee.xml')
+		imgGray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+		faces = faceCascade.detectMultiScale(imgGray, 1.1, 6)
+
+		myFaceListC = []
+		myFaceListArea = []
+
+		for (x, y, w, h) in faces:
+			cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+			cx = x + w // 2
+			cy = y + h // 2
+			area = w * h
+			myFaceListArea.append(area)
+			myFaceListC.append([cx, cy])
+
+		if len(myFaceListArea) != 0:
+			i = myFaceListArea.index(max(myFaceListArea))
+			return frame, [myFaceListC[i], myFaceListArea[i]]
+		else:
+			return frame, [[0, 0], 0]
 
 	def find_face(self, frame, comb_index, selectedX, selectedY):
 		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -70,12 +93,13 @@ class Face_Recognition:
 			x1_text = str(x1_pos)
 			y1_text = str(y1_pos)
 
-			id_1 = id == self.names[1]
-			id_2 = id == self.names[2]
-			id_3 = id == self.names[3]
-			id_4 = id == self.names[4]
+			id_1 = id == self.names[1] and index == 0
+			id_2 = id == self.names[2] and index == 1
+			id_3 = id == self.names[3] and index == 2
+			id_4 = id == self.names[4] and index == 3
+			id_5 = id == self.names[5] and index == 4
 
-			if id_1 or id_2 or id_3 or id_4 :
+			if id_1 or id_2 or id_3 or id_4 or id_5 :
 				cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
 				cv2.putText(frame, str(id), (x + 5, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 				cv2.putText(frame, str(confidence), (x + 5, y + h - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 1)
@@ -100,3 +124,39 @@ class Face_Recognition:
 			return frame, True, [myFaceListC[i], myFaceListArea[i]]
 		else:
 			return frame, True, [[0, 0], 0]
+
+	def face_tracking(self, info, w, pid, pError):
+		## PID
+		kp = pid[0]
+		ki = pid[1]
+		kd = pid[2]
+		error = info[0][0] - w // 2
+
+		if info[0][0] != 0:
+		
+			self.integral += error
+			print("error", error)
+			print("integral", self.integral)
+			derivative = error - pError
+			# PID EQUATION
+			output = kp * error + ki * self.integral + kd * derivative
+			# print("output", output)
+			
+			speed = int(np.clip(output, -100, 100))
+
+		
+			print(speed)
+		# 	self.myDrone.yaw_velocity = speed
+		else:
+			# self.myDrone.for_back_velocity = 0
+			# self.myDrone.left_right_velocity = 0
+			# self.myDrone.up_down_velocity = 0
+			# self.myDrone.yaw_velocity = 0
+			error = 0
+			integral = 0
+		# if self.myDrone.send_rc_control:
+		# 	self.myDrone.send_rc_control(self.myDrone.left_right_velocity,
+		# 							self.myDrone.for_back_velocity,
+		# 							self.myDrone.up_down_velocity,
+		# 							self.myDrone.yaw_velocity)
+		return error
