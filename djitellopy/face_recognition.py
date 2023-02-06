@@ -2,6 +2,8 @@ from . import Tello
 import pathlib
 import cv2
 import numpy as np
+import time
+
 
 class Face_Recognition:
 	cap= cv2.VideoCapture(0)
@@ -23,7 +25,7 @@ class Face_Recognition:
 
 
 	def get_frame(self, w, h):
-		# ret, frame = self.cap.read()
+		ret, frame = self.cap.read()
 		frame = cv2.flip(frame, 1)
 		frame = cv2.resize(frame, (w, h))
 		return frame
@@ -135,8 +137,8 @@ class Face_Recognition:
 		if info[0][0] != 0:
 		
 			self.integral += error
-			print("error", error)
-			print("integral", self.integral)
+			# print("error", error)
+			# print("integral", self.integral)
 			derivative = error - pError
 			# PID EQUATION
 			output = kp * error + ki * self.integral + kd * derivative
@@ -145,7 +147,7 @@ class Face_Recognition:
 			speed = int(np.clip(output, -100, 100))
 
 		
-			print(speed)
+			print("PID ", speed)
 		# 	self.myDrone.yaw_velocity = speed
 		else:
 			# self.myDrone.for_back_velocity = 0
@@ -159,4 +161,79 @@ class Face_Recognition:
 		# 							self.myDrone.for_back_velocity,
 		# 							self.myDrone.up_down_velocity,
 		# 							self.myDrone.yaw_velocity)
+		return error
+
+class Fuzzy:
+	# Definisikan fungsi keanggotaan (membership function)
+	membership_functions = [
+		{
+			# Fungsi keanggotaan error negatif besar (NB) dan delta error negatif besar (DB)
+			'error': [-100, -50, 0],
+			'd_error': [-100, -50, 0],
+			'output': -100
+		},
+		{
+			# Fungsi keanggotaan error negatif sedang (NS) dan delta error negatif sedang (DS)
+			'error': [-50, 0, 50],
+			'd_error': [-50, 0, 50],
+			'output': 0
+		},
+		{
+			# Fungsi keanggotaan error positif besar (PB) dan delta error positif besar (PB)
+			'error': [0, 50, 100],
+			'd_error': [0, 50, 100],
+			'output': 100
+		}
+	]
+	def __init__(self):
+		print("Initial Fuzzy")
+
+	def triangular(self, value, a, b, c):
+		if value < a:
+			return 0
+		elif value >= a and value < b:
+			return (value - a) / (b - a)
+		elif value >= b and value <= c:
+			return (c - value) / (c - b)
+		else:
+			return 0
+
+	# fuzzyfikasi menggunakan logika fuzzy "and" (min) MAMDANI
+	def fuzzyfikasi(self, error, d_error, membership_functions):
+		outputs = []
+		for mf in self.membership_functions:
+			error_degree = self.triangular(error, mf['error'][0], mf['error'][1], mf['error'][2])
+			d_error_degree = self.triangular(d_error, mf['d_error'][0], mf['d_error'][1], mf['d_error'][2])
+			output_degree = min(error_degree, d_error_degree)
+			outputs.append(output_degree * mf['output'])
+		return outputs
+
+	# defuzzyfikasi menggunakan logika fuzzy "or" (max) MAMDANI
+	def defuzzyfikasi(self, fuzzy_outputs):
+		return np.mean(fuzzy_outputs)
+
+	def calculate(self, info, w, pid, pError):
+
+		error = info[0][0] - w // 2
+		if info[0][0] != 0:
+			# Contoh penggunaan
+			# target_value = 10.0
+			# prev_error = 0.0
+
+			# Simulasikan proses membaca sensor
+			# current_value = 10.0 + (2.0 * (0.5 - time.time() % 1.0))
+			
+			# error = target_value - current_value
+			d_error = error - pError
+			# pError = error
+			print("fuzzy 1 ", error)
+			print("fuzzy 2 ", pError)
+			print("fuzzy 3 ", d_error)
+			# Proses fuzzyfikasi
+			fuzzy_outputs = self.fuzzyfikasi(error, d_error, self.membership_functions)
+			print("fuzzy a ", fuzzy_outputs)
+			# Proses defuzzyfikasi
+			output = self.defuzzyfikasi(fuzzy_outputs)
+
+			print("fuzzy b", output)
 		return error

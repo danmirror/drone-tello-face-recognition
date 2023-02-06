@@ -5,6 +5,7 @@ import cv2
 class Drone:
 
 	myDrone = Tello()
+	
 	integral = 0
 
 	def __init__(self):
@@ -18,10 +19,10 @@ class Drone:
 		print("Battery > ",self.myDrone.get_battery())
 		self.myDrone.streamoff()
 		self.myDrone.streamon()
-		self.myDrone.takeoff()
+		self.frame = self.myDrone.get_frame_read()
 
 	def get_frame(self, w, h):
-		frame = self.myDrone.get_frame_read().frame
+		frame = self.frame.frame
 		frame = cv2.flip(frame, 1)
 		frame = cv2.resize(frame, (w, h))
 		return frame

@@ -1,16 +1,18 @@
-from djitellopy import Face_Recognition
+from djitellopy import Face_Recognition, Fuzzy
 from djitellopy import Drone
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
 import pathlib
 from PIL import ImageTk, Image
+import threading
 
 #Tello
 import cv2
 
 myDrone = Drone()
 face_rec = Face_Recognition()
+fuzzy = Fuzzy()
 
 w, h = 640, 480
 
@@ -19,7 +21,9 @@ kp = 0.1
 ki = 0.02
 kd = 0.005
 pid = [kp, ki, kd]
-pError = 0
+pid_prevError = 0.0
+fuzzy_prevError = 0.0
+one_call = False
 
 
 win = Tk()
@@ -79,36 +83,44 @@ y_dis = Entry(
     )
 y_dis.place(x=680, y=230)
 
+
+def Takeoff():
+    myDrone.get_drone().takeoff()
+    print("Takeoff")
+    
+
+def Close():
+    print("closed")
+   
+    myDrone.get_drone().land()
+    win.destroy()
+
 def Tracking():
-    def show_frames():
-        global pError
-        status = 1
-        if status == 1:
+    global pid_prevError
+    global fuzzy_prevError
+  
+    frame = myDrone.get_frame( w, h)
+    # frame = face_rec.get_frame( w, h)
+    frame , info = face_rec.find_face_all(frame)
+    # frame, status, info = face_rec.find_face(frame, comb_index, selectedX, selectedY)
+    # if(not status):
+    # 	pass
+    
+    # pid_prevError = myDrone.tracking_face(info, w, pid, pid_prevError)
+    pid_prevError = face_rec.face_tracking(info, w, pid, pid_prevError)
+    # fuzzy_prevError = fuzzy.calculate(info, w, pid, fuzzy_prevError)
 
-            frame = myDrone.get_frame( w, h)
-            img , info = face_rec.find_face_all(frame)
-            # frame, status, info = face_rec.find_face(frame, comb_index, selectedX, selectedY)
-            # if(not status):
-            # 	pass
-            
-            # pError = face_rec.face_tracking(info, w, pid, pError)
-            pError = myDrone.tracking_face(info, w, pid, pError)
+    img = Image.fromarray(frame)
+    imgtk = ImageTk.PhotoImage(image=img)
+    label.imgtk = imgtk
+    label.configure(image=imgtk, background="#FFFFFF")
+    label.after(10, Tracking)
 
-            img = Image.fromarray(frame)
-            imgtk = ImageTk.PhotoImage(image=img)
-            label.imgtk = imgtk
-            label.configure(image=imgtk, background="#FFFFFF")
-            label.after(10, show_frames)
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #     # myDrone.land()
+    #     printf("closed")
+        # break
 
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                myDrone.land()
-                printf("closed")
-                # break
-        else:
-            print("Pilih Port dan Baut rate")
-            label.after(10, show_frames)
-
-    show_frames()
 
 # Button for Tracking
 tracking_button = Button(win, text="Tracking", height=1, width=10,
@@ -116,13 +128,15 @@ tracking_button = Button(win, text="Tracking", height=1, width=10,
                           fg='#163e6c',
                           font=('helvetica', 12, 'bold'),
                           border=0, command=Tracking)
-tracking_button.place(x=660, y=400)
+tracking_button.place(x=660, y=365)
 
+takeoff = Button(win, text="TakeOff", height=1, width=10,
+                          bg='#F2B830',
+                          fg='#163e6c',
+                          font=('helvetica', 12, 'bold'),
+                          border=0, command=Takeoff)
+takeoff.place(x=660, y=400)
 
-def Close():
-    printf("closed")
-    myDrone.land()
-    win.destroy()
 
 # Button for closing
 exit_button = Button(win, text="Exit", height=1, width=10,
