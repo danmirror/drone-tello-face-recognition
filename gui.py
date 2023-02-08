@@ -85,14 +85,13 @@ y_dis.place(x=680, y=230)
 
 
 def Takeoff():
-    myDrone.get_drone().takeoff()
     print("Takeoff")
+    myDrone.takeoff()
     
 
 def Close():
     print("closed")
-   
-    myDrone.get_drone().land()
+    myDrone.landing()
     win.destroy()
 
 def Tracking():
@@ -106,21 +105,16 @@ def Tracking():
     # if(not status):
     # 	pass
     
-    # pid_prevError = myDrone.tracking_face(info, w, pid, pid_prevError)
-    pid_prevError = face_rec.face_tracking(info, w, pid, pid_prevError)
-    # fuzzy_prevError = fuzzy.calculate(info, w, pid, fuzzy_prevError)
+    pid_prevError = myDrone.tracking_face(info, w, pid, pid_prevError)
+    # pid_prevError = face_rec.face_tracking(info, w, pid, pid_prevError)
+
+    fuzzy_prevError = myDrone.fuzzy_logic_mamdani(info, h, fuzzy_prevError)
 
     img = Image.fromarray(frame)
     imgtk = ImageTk.PhotoImage(image=img)
     label.imgtk = imgtk
     label.configure(image=imgtk, background="#FFFFFF")
     label.after(10, Tracking)
-
-    # if cv2.waitKey(1) & 0xFF == ord('q'):
-    #     # myDrone.land()
-    #     printf("closed")
-        # break
-
 
 # Button for Tracking
 tracking_button = Button(win, text="Tracking", height=1, width=10,
@@ -136,7 +130,6 @@ takeoff = Button(win, text="TakeOff", height=1, width=10,
                           font=('helvetica', 12, 'bold'),
                           border=0, command=Takeoff)
 takeoff.place(x=660, y=400)
-
 
 # Button for closing
 exit_button = Button(win, text="Exit", height=1, width=10,

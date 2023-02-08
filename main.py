@@ -22,6 +22,7 @@ tello.streamon()
 frame_read = tello.get_frame_read()
 
 tello.takeoff()
+send_rc_control = True
 
 while True:
     # In reality you want to display frames in a seperate thread. Otherwise
@@ -29,6 +30,19 @@ while True:
     # 在实际开发里请在另一个线程中显示摄像头画面，否则画面会在无人机移动时静止
     img = frame_read.frame
     cv2.imshow("drone", img)
+
+
+    tello.yaw_velocity = 20
+
+    tello.for_back_velocity = 0
+    tello.left_right_velocity = 0
+    tello.up_down_velocity = 20
+
+    if send_rc_control:
+        tello.send_rc_control(tello.left_right_velocity,
+                                tello.for_back_velocity,
+                                tello.up_down_velocity,
+                                tello.yaw_velocity)
 
     key = cv2.waitKey(1) & 0xff
     if key == 27: # ESC

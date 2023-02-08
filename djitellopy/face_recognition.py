@@ -132,13 +132,11 @@ class Face_Recognition:
 		kp = pid[0]
 		ki = pid[1]
 		kd = pid[2]
-		error = info[0][0] - w // 2
+		error =  w // 2 -info[0][0] 
 
 		if info[0][0] != 0:
 		
 			self.integral += error
-			# print("error", error)
-			# print("integral", self.integral)
 			derivative = error - pError
 			# PID EQUATION
 			output = kp * error + ki * self.integral + kd * derivative
@@ -148,92 +146,72 @@ class Face_Recognition:
 
 		
 			print("PID ", speed)
-		# 	self.myDrone.yaw_velocity = speed
 		else:
-			# self.myDrone.for_back_velocity = 0
-			# self.myDrone.left_right_velocity = 0
-			# self.myDrone.up_down_velocity = 0
-			# self.myDrone.yaw_velocity = 0
 			error = 0
 			integral = 0
-		# if self.myDrone.send_rc_control:
-		# 	self.myDrone.send_rc_control(self.myDrone.left_right_velocity,
-		# 							self.myDrone.for_back_velocity,
-		# 							self.myDrone.up_down_velocity,
-		# 							self.myDrone.yaw_velocity)
 		return error
 
 class Fuzzy:
-	# Definisikan fungsi keanggotaan (membership function)
-	membership_functions = [
-		{
-			# Fungsi keanggotaan error negatif besar (NB) dan delta error negatif besar (DB)
-			'error': [-100, -50, 0],
-			'd_error': [-100, -50, 0],
-			'output': -100
-		},
-		{
-			# Fungsi keanggotaan error negatif sedang (NS) dan delta error negatif sedang (DS)
-			'error': [-50, 0, 50],
-			'd_error': [-50, 0, 50],
-			'output': 0
-		},
-		{
-			# Fungsi keanggotaan error positif besar (PB) dan delta error positif besar (PB)
-			'error': [0, 50, 100],
-			'd_error': [0, 50, 100],
-			'output': 100
-		}
-	]
 	def __init__(self):
-		print("Initial Fuzzy")
+		print("fuzzy init")
 
-	def triangular(self, value, a, b, c):
-		if value < a:
+	def triangular_mf(self, x, a, b, c):
+		if x <= a:
 			return 0
-		elif value >= a and value < b:
-			return (value - a) / (b - a)
-		elif value >= b and value <= c:
-			return (c - value) / (c - b)
+		elif x > a and x < b:
+			return (x - a) / (b - a)
+		elif x >= b and x < c:
+			return (c - x) / (c - b)
 		else:
 			return 0
 
-	# fuzzyfikasi menggunakan logika fuzzy "and" (min) MAMDANI
-	def fuzzyfikasi(self, error, d_error, membership_functions):
-		outputs = []
-		for mf in self.membership_functions:
-			error_degree = self.triangular(error, mf['error'][0], mf['error'][1], mf['error'][2])
-			d_error_degree = self.triangular(d_error, mf['d_error'][0], mf['d_error'][1], mf['d_error'][2])
-			output_degree = min(error_degree, d_error_degree)
-			outputs.append(output_degree * mf['output'])
-		return outputs
+	def fuzzy_logic_mamdani(self, info, w, pError):
 
-	# defuzzyfikasi menggunakan logika fuzzy "or" (max) MAMDANI
-	def defuzzyfikasi(self, fuzzy_outputs):
-		return np.mean(fuzzy_outputs)
-
-	def calculate(self, info, w, pid, pError):
-
-		error = info[0][0] - w // 2
+		error =  w // 2 - info[0][0] 
 		if info[0][0] != 0:
-			# Contoh penggunaan
-			# target_value = 10.0
-			# prev_error = 0.0
+			derivative = (error + pError) //2  
 
-			# Simulasikan proses membaca sensor
-			# current_value = 10.0 + (2.0 * (0.5 - time.time() % 1.0))
-			
-			# error = target_value - current_value
-			d_error = error - pError
-			# pError = error
-			print("fuzzy 1 ", error)
-			print("fuzzy 2 ", pError)
-			print("fuzzy 3 ", d_error)
-			# Proses fuzzyfikasi
-			fuzzy_outputs = self.fuzzyfikasi(error, d_error, self.membership_functions)
-			print("fuzzy a ", fuzzy_outputs)
-			# Proses defuzzyfikasi
-			output = self.defuzzyfikasi(fuzzy_outputs)
+			# Membership function for error
+			error_low = self.triangular_mf(error, -200, -150, 0)
+			error_medium = self.triangular_mf(error, -150, 0, 150)
+			error_high = self.triangular_mf(error, 0, 150, 200)
 
-			print("fuzzy b", output)
-		return error
+			# Membership function for derivative
+			derivative_negatif = self.triangular_mf(derivative, -200, -150, 0)
+			derivative_nol = self.triangular_mf(derivative, -150, 0, 150)
+			derivative_positif = self.triangular_mf(derivative, 0, 150, 200)
+
+			# Rule base
+			rule_base = [
+				(min(error_low, derivative_negatif), 'fast'),
+				(min(error_low, derivative_nol), 'normal'),
+				(min(error_low, derivative_positif), 'slow'),
+				(min(error_medium, derivative_negatif), 'fast'),
+				(min(error_medium, derivative_nol), 'normal'),
+				(min(error_medium, derivative_positif), 'normal'),
+				(min(error_high, derivative_negatif), 'normal'),
+				(min(error_high, derivative_nol), 'slow'),
+				(min(error_high, derivative_positif), 'slow')
+			]
+
+			# Defuzzification
+			defuzzified_value = 0
+			total_weight = 0
+			for r in rule_base:
+				weight = r[0]
+				if weight > 0:
+					if r[1] == 'slow':
+						defuzzified_value += weight * -100
+						total_weight += weight
+					elif r[1] == 'normal':
+						defuzzified_value += weight * 0
+						total_weight += weight
+					elif r[1] == 'fast':
+						defuzzified_value += weight * 100
+						total_weight += weight
+			speed = 0
+			if not total_weight ==  0:
+				speed = - defuzzified_value / total_weight
+			print("fuzzy", speed)
+
+		return int(error)
