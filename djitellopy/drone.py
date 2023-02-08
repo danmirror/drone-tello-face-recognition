@@ -55,10 +55,7 @@ class Drone:
 			
 			speed = int(np.clip(output, -100, 100))
 
-		
-			print("error", error)
-			print("integral", self.integral)
-			print(speed)
+			print("PID", speed)
 			self.myDrone.yaw_velocity = speed
 		else:
 			self.myDrone.for_back_velocity = 0
@@ -131,7 +128,7 @@ class Drone:
 						total_weight += weight
 			speed = 0
 			if not total_weight ==  0:
-				speed = - defuzzified_value / total_weight
+				speed = defuzzified_value / total_weight
 			print("fuzzy", speed)
 			self.myDrone.up_down_velocity =int( speed)
 		else:

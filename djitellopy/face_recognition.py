@@ -167,8 +167,8 @@ class Fuzzy:
 
 	def fuzzy_logic_mamdani(self, info, w, pError):
 
-		error =  w // 2 - info[0][0] 
-		if info[0][0] != 0:
+		error =  w // 2 - info[0][1] 
+		if info[0][1] != 0:
 			derivative = (error + pError) //2  
 
 			# Membership function for error
@@ -211,7 +211,7 @@ class Fuzzy:
 						total_weight += weight
 			speed = 0
 			if not total_weight ==  0:
-				speed = - defuzzified_value / total_weight
+				speed = defuzzified_value / total_weight
 			print("fuzzy", speed)
 
 		return int(error)

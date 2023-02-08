@@ -10,7 +10,7 @@ import threading
 #Tello
 import cv2
 
-myDrone = Drone()
+# myDrone = Drone()
 face_rec = Face_Recognition()
 fuzzy = Fuzzy()
 
@@ -86,29 +86,29 @@ y_dis.place(x=680, y=230)
 
 def Takeoff():
     print("Takeoff")
-    myDrone.takeoff()
+    # myDrone.takeoff()
     
 
 def Close():
     print("closed")
-    myDrone.landing()
+    # myDrone.landing()
     win.destroy()
 
 def Tracking():
     global pid_prevError
     global fuzzy_prevError
   
-    frame = myDrone.get_frame( w, h)
-    # frame = face_rec.get_frame( w, h)
+    # frame = myDrone.get_frame( w, h)
+    frame = face_rec.get_frame( w, h)
     frame , info = face_rec.find_face_all(frame)
     # frame, status, info = face_rec.find_face(frame, comb_index, selectedX, selectedY)
     # if(not status):
     # 	pass
     
-    pid_prevError = myDrone.tracking_face(info, w, pid, pid_prevError)
-    # pid_prevError = face_rec.face_tracking(info, w, pid, pid_prevError)
+    # pid_prevError = myDrone.tracking_face(info, w, pid, pid_prevError)
+    pid_prevError = face_rec.face_tracking(info, w, pid, pid_prevError)
 
-    fuzzy_prevError = myDrone.fuzzy_logic_mamdani(info, h, fuzzy_prevError)
+    fuzzy_prevError = fuzzy.fuzzy_logic_mamdani(info, h, fuzzy_prevError)
 
     img = Image.fromarray(frame)
     imgtk = ImageTk.PhotoImage(image=img)
