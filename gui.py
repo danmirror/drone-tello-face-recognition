@@ -1,31 +1,41 @@
-from djitellopy import Face_Recognition, Fuzzy
-from djitellopy import Drone
+import cv2
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
 import pathlib
 from PIL import ImageTk, Image
-import threading
 
-#Tello
-import cv2
-
-# myDrone = Drone()
-face_rec = Face_Recognition()
-fuzzy = Fuzzy()
+from djitellopy import Drone
+from djitellopy import Face_Recognition
+from controller import PID, Fuzzy
 
 w, h = 640, 480
 
 # PID
 kp = 0.1
 ki = 0.02
-kd = 0.005
-pid = [kp, ki, kd]
-pid_prevError = 0.0
-fuzzy_prevError = 0.0
-one_call = False
+kd = 0.05
+
+# Fuzzy
+negative    = [-200, -150, 0]
+normal      = [-150, 0, 150]
+positive    = [0, 150, 200]
+
+speed_rl    = [-100, 100]
+speed_ud    = [-40, 40]
 
 
+pid_ud = PID(kp, ki, kd, speed_ud)
+pid_rl = PID(kp, ki, kd, speed_rl)
+
+fuzzy_ud = Fuzzy(negative, normal, positive, speed_ud)
+fuzzy_rl = Fuzzy(negative, normal, positive, speed_rl)
+
+# myDrone = Drone()
+face_rec = Face_Recognition()
+
+
+# ----------- UI ---------------
 win = Tk()
 win.geometry("790x485")
 win.title("Face Tracking & Recognition")
@@ -104,11 +114,30 @@ def Tracking():
     # frame, status, info = face_rec.find_face(frame, comb_index, selectedX, selectedY)
     # if(not status):
     # 	pass
-    
-    # pid_prevError = myDrone.tracking_face(info, w, pid, pid_prevError)
-    pid_prevError = face_rec.face_tracking(info, w, pid, pid_prevError)
 
-    fuzzy_prevError = fuzzy.fuzzy_logic_mamdani(info, h, fuzzy_prevError)
+     #right left 
+    if info[0][0] != 0:
+        error_rl =  w // 2 -info[0][0] 
+        # out_rl = pid_rl.update(error_rl)
+        # out_rl = fuzzy_rl.update(error_rl)
+        # print(" Output rl ", out_rl)
+        # myDrone.control(0, 0, 0, out_rl)
+    else:
+        pid_rl.clear()
+        fuzzy_rl.clear()
+        # myDrone.clear()
+    
+     #top down
+    if info[0][1] != 0:
+        error_ud =  h // 2 -info[0][1] 
+        # out_ud = - pid_ud.update(error_ud)
+        out_ud = - fuzzy_ud.update(error_ud)
+        # print(" Output ud ", out_ud)
+        # myDrone.control(0, 0, 0, out_ud)
+    else:
+        pid_ud.clear()
+        fuzzy_ud.clear()
+        # myDrone.clear()
 
     img = Image.fromarray(frame)
     imgtk = ImageTk.PhotoImage(image=img)
