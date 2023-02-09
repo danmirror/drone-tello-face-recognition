@@ -1,14 +1,28 @@
+'''
+	Proportional Integral Derivative 
+	Danu andrean 
+	2023
+
+'''
+
+
 import numpy as np
 
 class PID:
-	def __init__(self, kp, ki, kd, speed):
+	def __init__(self):
+		self.speed = 0
+		self.kp = 0
+		self.ki = 0
+		self.kd = 0
+		self.previous_error = 0
+		self.integral = 0
+
+	def set(self, kp, ki, kd, speed):
 		self.speed = speed
 		self.kp = kp
 		self.ki = ki
 		self.kd = kd
-		self.previous_error = 0
-		self.integral = 0
-	
+
 	def clear(self):
 		self.previous_error = 0
 		self.integral = 0

@@ -1,6 +1,38 @@
+'''
+	Fuzzy logic 
+	Danu andrean
+	2023
+
+
+----------------------------
+condition
+	   /\   /\   /\	
+	  /  \ /  \ /  \	
+	 /    \    \    \	
+	/    / \  / \    \		
+
+       -     0     +
+-----------------------------
+speed
+________        __________
+		\      /
+		 \    /
+		  \  /
+		   \/
+    -50    0    50
+
+'''
+
+
 class Fuzzy:
-	def __init__(self, negative, normal, positive, speed):
+	def __init__(self):
 		self.previous_error = 0
+		self.negative = 0
+		self.normal = 0
+		self.positive = 0
+		self.speed = 0
+
+	def set(self, negative, normal, positive, speed):
 		self.negative = negative
 		self.normal = normal
 		self.positive = positive
@@ -66,5 +98,4 @@ class Fuzzy:
 		output = 0
 		if not total_weight ==  0:
 			output = defuzzified_value / total_weight
-		print(output)
-		return output
+		return int(-output)
