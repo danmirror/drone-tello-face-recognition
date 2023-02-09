@@ -52,7 +52,7 @@ class Face_Recognition:
 		else:
 			return frame, [[0, 0], 0]
 
-	def find_face(self, frame, comb_index, selectedX, selectedY):
+	def find_face(self, frame, comb_face, selectedX, selectedY):
 		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 		gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 		faces = self.faceCascade.detectMultiScale(
@@ -60,7 +60,7 @@ class Face_Recognition:
 			scaleFactor=1.35,
 			minNeighbors=5,
 			minSize=(60, 60))
-		index = comb_index.current()
+		index = comb_face.current()
 
 		myFaceListC = []
 		myFaceListArea = []
