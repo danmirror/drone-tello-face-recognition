@@ -1,4 +1,3 @@
-from . import Tello
 import pathlib
 import cv2
 import numpy as np
@@ -17,8 +16,6 @@ class Face_Recognition:
 	faceCascade = cv2.CascadeClassifier(str(cascadePath))
 
 	font = cv2.FONT_HERSHEY_SIMPLEX
-	
-	# integral = 0
 
 	def __init__(self):
 		print("Initial Face")
@@ -53,7 +50,7 @@ class Face_Recognition:
 			return frame, [[0, 0], 0]
 
 	def find_face(self, frame, comb_face, selectedX, selectedY):
-		frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+		# frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 		gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 		faces = self.faceCascade.detectMultiScale(
 			gray,

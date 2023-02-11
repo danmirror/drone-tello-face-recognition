@@ -87,7 +87,7 @@ def Tracking():
         battery_value.set(str(myDrone.get_battery()) +"%")
     else:
         frame = face_rec.get_frame( w, h)
-
+# 
     # frame , info = face_rec.find_face_all(frame)
     frame, info = face_rec.find_face(frame, comb_face, selectedX, selectedY)
 

@@ -3,9 +3,7 @@ import numpy as np
 import cv2
 
 class Drone:
-
 	myDrone = Tello()
-	integral = 0
 
 	def __init__(self):
 		self.send_rc_control = False
