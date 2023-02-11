@@ -92,11 +92,11 @@ class Face_Recognition:
 			x1_text = str(x1_pos)
 			y1_text = str(y1_pos)
 
-			id_1 = id == self.names[1] # and index == 0
-			id_2 = id == self.names[2] # and index == 1
-			id_3 = id == self.names[3] # and index == 2
-			id_4 = id == self.names[4] # and index == 3
-			id_5 = id == self.names[5] # and index == 4
+			id_1 = id == self.names[1] and index == 0
+			id_2 = id == self.names[2] and index == 1
+			id_3 = id == self.names[3] and index == 2
+			id_4 = id == self.names[4] and index == 3
+			id_5 = id == self.names[5] and index == 4
 
 			if id_1 or id_2 or id_3 or id_4 or id_5 :
 				cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
