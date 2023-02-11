@@ -20,6 +20,9 @@ class Drone:
 		self.frame = self.myDrone.get_frame_read()
 		print("Battery > ",self.myDrone.get_battery())
 
+	def get_battery(self):
+		return self.myDrone.get_battery()
+
 	def get_frame(self, w, h):
 		frame = self.frame.frame
 		frame = cv2.flip(frame, 1)

@@ -11,13 +11,17 @@ from controller import PID, Fuzzy
 
 w, h = 640, 480
 
+is_drone = True
+
 pid_ud = PID()
 pid_rl = PID()
 
 fuzzy_ud = Fuzzy()
 fuzzy_rl = Fuzzy()
 
-# myDrone = Drone()
+if is_drone :
+    myDrone = Drone()
+
 face_rec = Face_Recognition()
 
 def set_value():
@@ -33,19 +37,6 @@ def set_value():
 
     fuzzy_ud.set(arr_min, arr_nor, arr_max, speed_ud)
     fuzzy_rl.set(arr_min, arr_nor, arr_max, speed_rl)
-
-
-def Takeoff():
-    print("Takeoff")
-
-    takeoff_button["state"] = "disabled"
-    # myDrone.takeoff()
-    
-
-def Close():
-    print("closed")
-    # myDrone.landing()
-    win.destroy()
 
 def disable():
     tracking_button["state"] = "disabled"
@@ -72,18 +63,35 @@ def disable():
     comb_face["state"] = "disabled"
     comb_control["state"] = "disabled"
 
+def Takeoff():
+
+    print("Takeoff")
+    takeoff_button["state"] = "disabled"
+    if is_drone :
+        myDrone.takeoff()
+
+def Close():
+    print("closed")
+    
+    if is_drone :
+        myDrone.landing()
+    
+    win.destroy()
+
 def Tracking():
     
     set_value()
     disable()
-    # frame = myDrone.get_frame( w, h)
-    frame = face_rec.get_frame( w, h)
-    frame , info = face_rec.find_face_all(frame)
-    # frame, status, info = face_rec.find_face(frame, comb_face, selectedX, selectedY)
-    # if(not status):
-    # 	pass
+    if is_drone :
+        frame = myDrone.get_frame( w, h)
+        battery_value.set(str(myDrone.get_battery()) +"%")
+    else:
+        frame = face_rec.get_frame( w, h)
 
-     #right left 
+    # frame , info = face_rec.find_face_all(frame)
+    frame, info = face_rec.find_face(frame, comb_face, selectedX, selectedY)
+
+    #right left 
     if info[0][0] != 0:
         error_rl =  w // 2 -info[0][0] 
         if control_value.get() == "PID" :
@@ -92,12 +100,15 @@ def Tracking():
         else:
             out_rl = fuzzy_rl.update(error_rl)
             print(" Output fuzzy rl ", out_rl)
-        
-        # myDrone.control(0, 0, 0, out_rl)
+
+        if is_drone :
+            myDrone.control(0, 0, 0, out_rl)
     else:
         pid_rl.clear()
         fuzzy_rl.clear()
-        # myDrone.clear()
+
+        if is_drone :
+            myDrone.clear()
     
      #top down
     if info[0][1] != 0:
@@ -109,11 +120,14 @@ def Tracking():
             out_ud = fuzzy_ud.update(error_ud)
             print(" Output fuzzy ud ", out_ud)
         
-        # myDrone.control(0, 0, out_ud, 0)
+        if is_drone :
+            myDrone.control(0, 0, out_ud, 0)
     else:
         pid_ud.clear()
         fuzzy_ud.clear()
-        # myDrone.clear()
+
+        if is_drone :
+            myDrone.clear()
 
     img = Image.fromarray(frame)
     imgtk = ImageTk.PhotoImage(image=img)
@@ -152,15 +166,16 @@ selected2 = tk.StringVar()
 selectedX = tk.StringVar()
 selectedY = tk.StringVar()
 control_value = tk.StringVar()
+battery_value = tk.StringVar()
 
 label_PID = ttk.Label(text="PID", font='Helvetica 14 bold', foreground="#aaaaaa")
 label_PID.place(x=820 , y=10)
-l_kp = ttk.Label(text="kp") 
-l_kp.place(x=820 , y=40)
-l_ki = ttk.Label(text="ki")
-l_ki.place(x=820 , y=60)
-l_kd = ttk.Label(text="kd")
-l_kd.place(x=820 , y=80)
+label_kp = ttk.Label(text="kp") 
+label_kp.place(x=820 , y=40)
+label_ki = ttk.Label(text="ki")
+label_ki.place(x=820 , y=60)
+label_kd = ttk.Label(text="kd")
+label_kd.place(x=820 , y=80)
 
 kp_input = tk.Entry(win)
 kp_input.place(x=870, y=40, width=50) 
@@ -175,12 +190,12 @@ kd_input.insert(0, 0.05)
 
 label_fuzzy = ttk.Label(text="Fuzzy", font='Helvetica 14 bold', foreground="#aaaaaa")
 label_fuzzy.place(x=820 , y=120)
-l_kp = ttk.Label(text="Negatif")
-l_kp.place(x=820 , y=150)
-l_ki = ttk.Label(text="Normal")
-l_ki.place(x=820 , y=170)
-l_kd = ttk.Label(text="Positif")
-l_kd.place(x=820 , y=190)
+label_kp = ttk.Label(text="Negatif")
+label_kp.place(x=820 , y=150)
+label_ki = ttk.Label(text="Normal")
+label_ki.place(x=820 , y=170)
+label_kd = ttk.Label(text="Positif")
+label_kd.place(x=820 , y=190)
 
 negative_input1 = tk.Entry(win)
 negative_input1.place(x=870, y=150, width=40)
@@ -215,10 +230,10 @@ positive_input3.insert(0, 200)
 
 label_speed = ttk.Label(text="Speed", font='Helvetica 14 bold', foreground="#aaaaaa")
 label_speed.place(x=820 , y=230)
-l_rl = ttk.Label(text="RL")
-l_rl.place(x=820 , y=260)
-l_ud = ttk.Label(text="UD")
-l_ud.place(x=820 , y=280)
+label_rl = ttk.Label(text="RL")
+label_rl.place(x=820 , y=260)
+label_ud = ttk.Label(text="UD")
+label_ud.place(x=820 , y=280)
 
 rl_input1 = tk.Entry(win)
 rl_input1.place(x=870, y=260, width=40)
@@ -275,6 +290,17 @@ y_dis = Entry(
     )
 y_dis.place(x=690, y=240)
 
+label_bat = ttk.Label(text="Battery", background ="#FFFFFF", font='Helvetica 12 bold', foreground="#aaaaaa")
+label_bat.place(x=660 , y=280)
+
+battery = Entry(
+    win,
+    width=8,
+    font=('Arial', 14),
+    textvariable=battery_value,
+    )
+battery.place(x=720, y=280, width=50)
+
 
 # Button for Tracking
 tracking_button = Button(win, text="Tracking", height=1, width=10,
@@ -282,14 +308,14 @@ tracking_button = Button(win, text="Tracking", height=1, width=10,
                           fg='#163e6c',
                           font=('helvetica', 12, 'bold'),
                           border=0, command=Tracking)
-tracking_button.place(x=660, y=320)
+tracking_button.place(x=660, y=350)
 
 takeoff_button = Button(win, text="TakeOff", height=1, width=10,
                           bg='#F2B830',
                           fg='#163e6c',
                           font=('helvetica', 12, 'bold'),
                           border=0, command=Takeoff)
-takeoff_button.place(x=660, y=350)
+takeoff_button.place(x=660, y=380)
 
 # Button for closing
 exit_button = Button(win, text="Exit", height=1, width=10,
@@ -297,6 +323,6 @@ exit_button = Button(win, text="Exit", height=1, width=10,
                           fg='#163e6c',
                           font=('helvetica', 12, 'bold'),
                           border=0, command=Close)
-exit_button.place(x=660, y=380)
+exit_button.place(x=660, y=410)
 
 win.mainloop()
