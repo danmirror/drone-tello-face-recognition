@@ -9,9 +9,15 @@ from djitellopy import Drone
 from djitellopy import Face_Recognition
 from controller import PID, Fuzzy
 
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+
 w, h = 640, 480
 
-is_drone = True
+is_drone = False
 
 pid_ud = PID()
 pid_rl = PID()
@@ -88,8 +94,8 @@ def Tracking():
     else:
         frame = face_rec.get_frame( w, h)
 # 
-    # frame , info = face_rec.find_face_all(frame)
-    frame, info = face_rec.find_face(frame, comb_face, selectedX, selectedY)
+    frame , info = face_rec.find_face_all(frame)
+    # frame, info = face_rec.find_face(frame, comb_face, selectedX, selectedY)
 
     #right left 
     if info[0][0] != 0:
@@ -139,9 +145,9 @@ def Tracking():
 
 # ----------- UI ---------------
 win = Tk()
-win.geometry("1000x485")
+win.geometry("1300x485")
 win.title("Face Tracking & Recognition")
-win.resizable(0,0)
+# win.resizable(0,0)
 
 bg = Image.open("ui_data/bg.png")
 bg_resize = bg.resize((800,480))
@@ -324,5 +330,42 @@ exit_button = Button(win, text="Exit", height=1, width=10,
                           font=('helvetica', 12, 'bold'),
                           border=0, command=Close)
 exit_button.place(x=660, y=410)
+
+# Create some data
+x = [0,1,2,3,4,5,6,7,8,9]
+y = [0,0,0,0,0,0,0,0,0,0]
+y2 = np.cos(x)
+# Create a Matplotlib figure
+fig = plt.Figure(figsize=(3, 2), dpi=100)
+ax = fig.add_subplot(1, 1, 1)
+line, = ax.plot(x, y, color='blue', label='Line 1')
+# line2, = ax.plot(x, y2, color='red', label='Line 2')
+
+# Set the x and y ticks and tick labels
+# ax.set_xticks(np.arange(0, 1, 10))
+# ax.set_yticks(np.arange(-1, 1.1, 0.5))
+# ax.set_xticklabels(np.arange(1, 1, 10))
+# ax.set_yticklabels(np.arange(-1, 1.1, 0.5))
+
+# Set the axis limits
+ax.set_xlim(0, 10)
+ax.set_ylim(-1, 10)
+
+# Define the update function
+def update(frame):
+    
+    y.append(9)
+    y.pop(0)
+    # Update the plot line with the new data
+    line.set_data(x, y)
+    return line,
+
+# Create a canvas to display the figure in Tkinter
+canvas = FigureCanvasTkAgg(fig, master=win)
+canvas.get_tk_widget().place(x=1000, y=50)
+
+# Create an animation object
+ani = FuncAnimation(fig, update, interval=1)
+
 
 win.mainloop()
