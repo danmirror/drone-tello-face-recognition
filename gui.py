@@ -30,6 +30,16 @@ if is_drone :
 
 face_rec = Face_Recognition()
 
+
+# data
+x_rl = np.linspace(0,10,50)
+y_target_rl = np.zeros(len(x_rl))
+y_error_rl = np.zeros(len(x_rl))
+
+x_ud = np.linspace(0,10,50)
+y_target_ud = np.zeros(len(x_ud))
+y_error_ud = np.zeros(len(x_ud))
+
 def set_value():
     speed_ud = [int(ud_input1.get()), int(ud_input2.get())]
     speed_rl = [int(rl_input1.get()), int(rl_input2.get())]
@@ -86,6 +96,8 @@ def Close():
 
 def Tracking():
     
+    global y_target_rl, y_error_rl, y_target_ud, y_error_ud
+
     set_value()
     disable()
     if is_drone :
@@ -93,13 +105,15 @@ def Tracking():
         battery_value.set(str(myDrone.get_battery()) +"%")
     else:
         frame = face_rec.get_frame( w, h)
-# 
+
     frame , info = face_rec.find_face_all(frame)
     # frame, info = face_rec.find_face(frame, comb_face, selectedX, selectedY)
 
     #right left 
     if info[0][0] != 0:
+
         error_rl =  w // 2 -info[0][0] 
+        
         if control_value.get() == "PID" :
             out_rl = pid_rl.update(error_rl)
             print(" Output pid rl ", out_rl)
@@ -109,6 +123,12 @@ def Tracking():
 
         if is_drone :
             myDrone.control(0, 0, 0, out_rl)
+        
+        y_target_rl = np.append(y_target_rl, 0)
+        y_target_rl = np.delete(y_target_rl, 0)
+        y_error_rl = np.append(y_error_rl, error_rl)
+        y_error_rl = np.delete(y_error_rl, 0)
+
     else:
         pid_rl.clear()
         fuzzy_rl.clear()
@@ -128,6 +148,12 @@ def Tracking():
         
         if is_drone :
             myDrone.control(0, 0, out_ud, 0)
+        
+        y_target_ud = np.append(y_target_ud, 0)
+        y_target_ud = np.delete(y_target_ud, 0)
+        y_error_ud = np.append(y_error_ud, error_ud)
+        y_error_ud = np.delete(y_error_ud, 0)
+
     else:
         pid_ud.clear()
         fuzzy_ud.clear()
@@ -331,41 +357,43 @@ exit_button = Button(win, text="Exit", height=1, width=10,
                           border=0, command=Close)
 exit_button.place(x=660, y=410)
 
-# Create some data
-x = [0,1,2,3,4,5,6,7,8,9]
-y = [0,0,0,0,0,0,0,0,0,0]
-y2 = np.cos(x)
 # Create a Matplotlib figure
-fig = plt.Figure(figsize=(3, 2), dpi=100)
-ax = fig.add_subplot(1, 1, 1)
-line, = ax.plot(x, y, color='blue', label='Line 1')
-# line2, = ax.plot(x, y2, color='red', label='Line 2')
+fig_rl = plt.Figure(figsize=(3, 2), dpi=100)
+axis_rl = fig_rl.add_subplot(1, 1, 1)
+target_rl, = axis_rl.plot(x_rl, y_target_rl, color='blue', label='target 1')
+error_rl, = axis_rl.plot(x_rl, y_error_rl, color='red', label='error 1')
 
-# Set the x and y ticks and tick labels
-# ax.set_xticks(np.arange(0, 1, 10))
-# ax.set_yticks(np.arange(-1, 1.1, 0.5))
-# ax.set_xticklabels(np.arange(1, 1, 10))
-# ax.set_yticklabels(np.arange(-1, 1.1, 0.5))
+fig_ud = plt.Figure(figsize=(3, 2), dpi=100)
+axis_ud = fig_ud.add_subplot(1, 1, 1)
+target_ud, = axis_ud.plot(x_ud, y_target_ud, color='blue', label='target 1')
+error_ud, = axis_ud.plot(x_ud, y_error_ud, color='red', label='error 1')
 
 # Set the axis limits
-ax.set_xlim(0, 10)
-ax.set_ylim(-1, 10)
+axis_rl.set_xlim(0, 10)
+axis_rl.set_ylim(-320, 320)
+
+axis_ud.set_xlim(0, 10)
+axis_ud.set_ylim(-320, 320)
 
 # Define the update function
-def update(frame):
-    
-    y.append(9)
-    y.pop(0)
-    # Update the plot line with the new data
-    line.set_data(x, y)
-    return line,
+def update_rl(frame):
+    target_rl.set_data(x_rl, y_target_rl)
+    error_rl.set_data(x_rl, y_error_rl)
+
+def update_ud(frame):
+    target_ud.set_data(x_ud, y_target_ud)
+    error_ud.set_data(x_ud, y_error_ud)
 
 # Create a canvas to display the figure in Tkinter
-canvas = FigureCanvasTkAgg(fig, master=win)
-canvas.get_tk_widget().place(x=1000, y=50)
+canvas_rl = FigureCanvasTkAgg(fig_rl, master=win)
+canvas_rl.get_tk_widget().place(x=1000, y=10)
+
+canvas_ud = FigureCanvasTkAgg(fig_ud, master=win)
+canvas_ud.get_tk_widget().place(x=1000, y=250)
 
 # Create an animation object
-ani = FuncAnimation(fig, update, interval=1)
+rl = FuncAnimation(fig_rl, update_rl, interval=1)
+ud = FuncAnimation(fig_ud, update_ud, interval=1)
 
 
 win.mainloop()
