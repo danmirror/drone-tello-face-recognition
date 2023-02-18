@@ -1,17 +1,10 @@
+from tkinter import *   
+from tkinter import ttk
+win = Tk()
+win.geometry("1200x680")
+fm =Frame(height = 100,width = 640,bg = "#FFFFFF")
+fm.place(x= 150, y= 0)
 
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Create a Matplotlib plot
-fig, ax = plt.subplots()
-line, = ax.plot([], [])
-
-# Generate some new data
-x = np.linspace(0, 10, 100)
-y = np.exp(-x/2) * np.cos(2*np.pi*x)
-
-# Update the plot with the new data
-line.set_data(x, y)
-
-# Display the plot
-plt.show()
+label_PID = ttk.Label(fm, text="PID", font='Helvetica 14 bold', foreground="#aaaaaa")
+label_PID.place(x=0 , y=10)
+win.mainloop() 

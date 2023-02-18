@@ -86,6 +86,9 @@ def Takeoff():
     if is_drone :
         myDrone.takeoff()
 
+def Landing():
+    pass
+
 def Close():
     print("closed")
     
@@ -171,26 +174,10 @@ def Tracking():
 
 # ----------- UI ---------------
 win = Tk()
-win.geometry("1300x485")
+win.geometry("1200x660")
 win.title("Face Tracking & Recognition")
-# win.resizable(0,0)
+win.resizable(0,0)
 
-bg = Image.open("ui_data/bg.png")
-bg_resize = bg.resize((800,480))
-bg_img = ImageTk.PhotoImage(bg_resize)
-bg_pic = Label(image=bg_img)
-bg_pic.image = bg_img
-bg_pic.place(x= 0, y= 0)
-
-logo = Image.open("ui_data/ugm.png")
-logo_resize = logo.resize((150,140))
-img = ImageTk.PhotoImage(logo_resize)
-logoo = Label(image=img,background ="#FFFFFF")
-logoo.image = img
-logoo.place(x= 640, y= 10)
-
-label =Label(win)
-label.grid(row=0, column=0)
 
 selected = tk.StringVar()
 selected1 = tk.StringVar()
@@ -200,173 +187,248 @@ selectedY = tk.StringVar()
 control_value = tk.StringVar()
 battery_value = tk.StringVar()
 
-label_PID = ttk.Label(text="PID", font='Helvetica 14 bold', foreground="#aaaaaa")
-label_PID.place(x=820 , y=10)
-label_kp = ttk.Label(text="kp") 
-label_kp.place(x=820 , y=40)
-label_ki = ttk.Label(text="ki")
-label_ki.place(x=820 , y=60)
-label_kd = ttk.Label(text="kd")
-label_kd.place(x=820 , y=80)
+############################### Title ###############################
+frame_title =Frame(height = 150,width = 680,bg = "#FFFFFF")
+frame_title.place(x= 0, y= 0)
 
-kp_input = tk.Entry(win)
-kp_input.place(x=870, y=40, width=50) 
+logo = Image.open("ui_data/ugm.png")
+logo_resize = logo.resize((150,140))
+img = ImageTk.PhotoImage(logo_resize)
+logoo = Label(frame_title, image=img,background ="#FFFFFF")
+logoo.image = img
+logoo.place(x= 0, y= 0)
+label_title = Label(frame_title, text="IMPLEMENTASI KENDALI PID PADA\n"
+                    "QUADCOPTER UNTUK STABILISASI TRACKING\n"
+                    "PADA SISTEM DETEKSI WAJAH MANUSIA\n"
+                    "DENGAN METODE LBPH FACE RECOGNITION",
+                     fg="#aaaaaa", font="Helvetica 14 bold", width=50, height=5, anchor=CENTER)
+label_title.place(x= 150, y= 0)
+
+############################### Description ###############################
+frame_des =Frame(height = 150,width = 500,bg = "#FFFFFF")
+frame_des.place(x= 685, y= 0)
+label_des = Label(frame_des, text="IMPLEMENTASI KENDALI PID PADA\n",
+                     fg="#aaaaaa", font="Helvetica 14 bold", width=40, height=5, anchor=CENTER)
+label_des.place(x= 0, y= 0)
+
+############################### Image   ###############################
+frame_container_img =Frame(height = h,width = w, bg = "#FFFFFF")
+frame_container_img.place(x= 0, y= 160)
+
+frame_image =Frame(height = h,width = w)
+frame_image.place(x= 0, y= 160)
+
+label =Label(frame_image)
+label.grid(row=0, column=0)
+
+
+############################### Face    ###############################
+frame_face =Frame(height = 50,width = 120,bg = "#FFFFFF", padx=5, pady=5)
+frame_face.place(x= 650, y= 180)
+
+label_face = ttk.Label(frame_face, text="Face Selection", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
+label_face.place(x=0 , y=0)
+
+comb_face = ttk.Combobox(frame_face,textvariable=selected, values=["Dian","Yossi","Fahmizal","Alim","Matthew"], state="readonly", width=10)
+comb_face.current(0)
+comb_face.place (x=0 , y=20)
+
+############################### Baterry ###############################
+frame_bat =Frame(height = 40,width = 120,bg = "#FFFFFF", padx=5, pady=5)
+frame_bat.place(x= 650, y= 240)
+label_bat = ttk.Label(frame_bat, text="Battery", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
+label_bat.place(x=0 , y=0)
+
+battery = Entry(frame_bat,width=8, font=('Arial', 14),textvariable=battery_value)
+battery.place(x=60, y=0, width=40)
+
+
+
+############################### Speed   ###############################
+frame_speed =Frame(height = 150,width = 120,bg = "#FFFFFF", padx=5, pady=5)
+frame_speed.place(x= 650, y= 300)
+
+label_speed = ttk.Label(frame_speed, text="Speed", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
+label_speed.place(x=0 , y=0)
+label_U = ttk.Label(frame_speed, text="UP", background="#FFFFFF", foreground="#aaaaaa")
+label_U.place(x=0 , y=20)
+label_D = ttk.Label(frame_speed, text="DOWN", background="#FFFFFF", foreground="#aaaaaa")
+label_D.place(x=0 , y=50)
+label_R = ttk.Label(frame_speed, text="RIGHT", background="#FFFFFF", foreground="#aaaaaa")
+label_R.place(x=0 , y=80)
+label_L = ttk.Label(frame_speed, text="LEFT", background="#FFFFFF", foreground="#aaaaaa")
+label_L.place(x=0 , y=110)
+
+ud_input1 = tk.Entry(frame_speed)
+ud_input1.place(x=60, y=20, width=40)
+ud_input1.insert(0, -50)
+ud_input2 = tk.Entry(frame_speed)
+ud_input2.place(x=60, y=50, width=40)
+ud_input2.insert(0, 50)
+
+rl_input1 = tk.Entry(frame_speed)
+rl_input1.place(x=60, y=80, width=40)
+rl_input1.insert(0, -50)
+rl_input2 = tk.Entry(frame_speed)
+rl_input2.place(x=60, y=110, width=40)
+rl_input2.insert(0, 50)
+
+# ############################### Speed   ###############################
+# frame_speed =Frame(height = 70,width = 120,bg = "#FFFFFF", padx=5, pady=5)
+# frame_speed.place(x= 650, y= 280)
+
+# label_speed = ttk.Label(frame_speed, text="Speed", font='Helvetica 14 bold', background="#FFFFFF", foreground="#aaaaaa")
+# label_speed.place(x=0 , y=0)
+# label_rl = ttk.Label(frame_speed, text="RL")
+# label_rl.place(x=0 , y=20)
+# label_ud = ttk.Label(frame_speed, text="UD")
+# label_ud.place(x=0 , y=40)
+
+# rl_input1 = tk.Entry(frame_speed)
+# rl_input1.place(x=30, y=20, width=40)
+# rl_input1.insert(0, -50)
+# rl_input2 = tk.Entry(frame_speed)
+# rl_input2.place(x=70, y=20, width=40)
+# rl_input2.insert(0, 50)
+
+# ud_input1 = tk.Entry(frame_speed)
+# ud_input1.place(x=30, y=40, width=40)
+# ud_input1.insert(0, -50)
+# ud_input2 = tk.Entry(frame_speed)
+# ud_input2.place(x=70, y=40, width=40)
+# ud_input2.insert(0, 50)
+
+############################### PID     ###############################
+frame_pid =Frame(height = 130,width = 140,bg = "#FFFFFF", padx=5, pady=5)
+frame_pid.place(x= 780, y= 180)
+
+label_PID = ttk.Label(frame_pid, text="PID", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
+label_PID.place(x=0 , y=0)
+label_kp = ttk.Label(frame_pid, text="kp", background="#FFFFFF", foreground="#aaaaaa") 
+label_kp.place(x=0 , y=30)
+label_ki = ttk.Label(frame_pid, text="ki", background="#FFFFFF", foreground="#aaaaaa")
+label_ki.place(x=0 , y=60)
+label_kd = ttk.Label(frame_pid, text="kd", background="#FFFFFF", foreground="#aaaaaa")
+label_kd.place(x=0 , y=90)
+
+kp_input = tk.Entry(frame_pid)
+kp_input.place(x=30, y=30, width=80) 
 kp_input.insert(0, 0.1)
-ki_input = tk.Entry(win)
-ki_input.place(x=870, y=60, width=50)
+ki_input = tk.Entry(frame_pid)
+ki_input.place(x=30, y=60, width=80)
 ki_input.insert(0, 0.02)
-kd_input = tk.Entry(win)
-kd_input.place(x=870, y=80, width=50)
+kd_input = tk.Entry(frame_pid)
+kd_input.place(x=30, y=90, width=80)
 kd_input.insert(0, 0.05)
 
 
-label_fuzzy = ttk.Label(text="Fuzzy", font='Helvetica 14 bold', foreground="#aaaaaa")
-label_fuzzy.place(x=820 , y=120)
-label_kp = ttk.Label(text="Negatif")
-label_kp.place(x=820 , y=150)
-label_ki = ttk.Label(text="Normal")
-label_ki.place(x=820 , y=170)
-label_kd = ttk.Label(text="Positif")
-label_kd.place(x=820 , y=190)
+############################### Face Coordinate   ###############################
+frame_coor =Frame(height = 110,width = 140,bg = "#FFFFFF", padx=5, pady=5)
+frame_coor.place(x= 780, y= 330)
+label_coor = ttk.Label(frame_coor, text="Face Coordinate", background ="#FFFFFF", font='Helvetica 12 bold', foreground="#aaaaaa")
+label_coor.place(x=0 , y=0)
 
-negative_input1 = tk.Entry(win)
-negative_input1.place(x=870, y=150, width=40)
+label_x = ttk.Label(frame_coor, text="X =", background ="#FFFFFF")
+label_x.place(x=0 , y=30)
+
+label_y = ttk.Label(frame_coor, text="Y =", background ="#FFFFFF")
+label_y.place(x=0 , y=65)
+
+x_dis = Entry(frame_coor, width=8, font=('Arial', 14), textvariable=selectedX)
+x_dis.place(x=30, y=30)
+
+y_dis = Entry( frame_coor, width=8, font=('Arial', 14),textvariable=selectedY)
+y_dis.place(x=30, y=65)
+
+
+
+############################### Fuzzy   ###############################
+frame_fuzzy =Frame(height = 100,width = 170,bg = "#FFFFFF")
+frame_fuzzy.place(x= 780, y= 700)
+
+label_fuzzy = ttk.Label(frame_fuzzy, text="Fuzzy", font='Helvetica 14 bold', foreground="#aaaaaa")
+label_fuzzy.place(x=0 , y=0)
+label_kp = ttk.Label(frame_fuzzy, text="Negatif")
+label_kp.place(x=0 , y=30)
+label_ki = ttk.Label(frame_fuzzy, text="Normal")
+label_ki.place(x=0 , y=50)
+label_kd = ttk.Label(frame_fuzzy, text="Positif")
+label_kd.place(x=0 , y=70)
+
+negative_input1 = tk.Entry(frame_fuzzy)
+negative_input1.place(x=50, y=30, width=40)
 negative_input1.insert(0, -200)
-negative_input2 = tk.Entry(win)
-negative_input2.place(x=910, y=150, width=40)
+negative_input2 = tk.Entry(frame_fuzzy)
+negative_input2.place(x=90, y=30, width=40)
 negative_input2.insert(0, -150)
-negative_input3 = tk.Entry(win)
-negative_input3.place(x=950, y=150, width=40)
+negative_input3 = tk.Entry(frame_fuzzy)
+negative_input3.place(x=130, y=30, width=40)
 negative_input3.insert(0, 0)
 
-normal_input1 = tk.Entry(win)
-normal_input1.place(x=870, y=170, width=40)
+normal_input1 = tk.Entry(frame_fuzzy)
+normal_input1.place(x=50, y=50, width=40)
 normal_input1.insert(0, -150)
-normal_input2 = tk.Entry(win)
-normal_input2.place(x=910, y=170, width=40)
+normal_input2 = tk.Entry(frame_fuzzy)
+normal_input2.place(x=90, y=50, width=40)
 normal_input2.insert(0, 0)
-normal_input3 = tk.Entry(win)
-normal_input3.place(x=950, y=170, width=40)
+normal_input3 = tk.Entry(frame_fuzzy)
+normal_input3.place(x=130, y=50, width=40)
 normal_input3.insert(0, 150)
 
-positive_input1 = tk.Entry(win)
-positive_input1.place(x=870, y=190, width=40)
+positive_input1 = tk.Entry(frame_fuzzy)
+positive_input1.place(x=50, y=70, width=40)
 positive_input1.insert(0, 0)
-positive_input2 = tk.Entry(win)
-positive_input2.place(x=910, y=190, width=40)
+positive_input2 = tk.Entry(frame_fuzzy)
+positive_input2.place(x=90, y=70, width=40)
 positive_input2.insert(0, 150)
-positive_input3 = tk.Entry(win)
-positive_input3.place(x=950, y=190, width=40)
+positive_input3 = tk.Entry(frame_fuzzy)
+positive_input3.place(x=130, y=70, width=40)
 positive_input3.insert(0, 200)
 
 
-label_speed = ttk.Label(text="Speed", font='Helvetica 14 bold', foreground="#aaaaaa")
-label_speed.place(x=820 , y=230)
-label_rl = ttk.Label(text="RL")
-label_rl.place(x=820 , y=260)
-label_ud = ttk.Label(text="UD")
-label_ud.place(x=820 , y=280)
-
-rl_input1 = tk.Entry(win)
-rl_input1.place(x=870, y=260, width=40)
-rl_input1.insert(0, -50)
-rl_input2 = tk.Entry(win)
-rl_input2.place(x=910, y=260, width=40)
-rl_input2.insert(0, 50)
-
-ud_input1 = tk.Entry(win)
-ud_input1.place(x=870, y=280, width=40)
-ud_input1.insert(0, -50)
-ud_input2 = tk.Entry(win)
-ud_input2.place(x=910, y=280, width=40)
-ud_input2.insert(0, 50)
-
-label_face = ttk.Label(text="Face Selectioon", font='Helvetica 12 bold', foreground="#aaaaaa")
-label_face.place(x=820 , y=350)
-
-comb_face = ttk.Combobox(win,textvariable=selected, values=["Dian","Yossi","Fahmizal","Alim","Matthew"], state="readonly", width=16)
-comb_face.current(0)
-comb_face.place (x=820 , y=370)
 
 label_control = ttk.Label(text="Control Selection", font='Helvetica 12 bold', foreground="#aaaaaa")
-label_control.place(x=820 , y=400)
+label_control.place(x=820 , y=700)
 
 comb_control = ttk.Combobox(win,textvariable=control_value, values=["PID","Fuzzy"], state="readonly", width=16)
 comb_control.current(0)
-comb_control.place (x=820 , y=420)
-
-
-
-label_coor = ttk.Label(text="Face Coordinate", background ="#FFFFFF", font='Helvetica 12 bold', foreground="#aaaaaa")
-label_coor.place(x=660 , y=180)
-
-label_x = ttk.Label(text="X =", background ="#FFFFFF")
-label_x.place(x=660 , y=210)
-
-label_y = ttk.Label(text="Y =", background ="#FFFFFF")
-label_y.place(x=660 , y=240)
-
-x_dis = Entry(
-    win,
-    width=8,
-    font=('Arial', 14),
-    textvariable=selectedX,
-    )
-x_dis.place(x=690, y=210)
-
-y_dis = Entry(
-    win,
-    width=8,
-    font=('Arial', 14),
-    textvariable=selectedY,
-    )
-y_dis.place(x=690, y=240)
-
-label_bat = ttk.Label(text="Battery", background ="#FFFFFF", font='Helvetica 12 bold', foreground="#aaaaaa")
-label_bat.place(x=660 , y=280)
-
-battery = Entry(
-    win,
-    width=8,
-    font=('Arial', 14),
-    textvariable=battery_value,
-    )
-battery.place(x=720, y=280, width=50)
+comb_control.place (x=820 , y=720)
 
 
 # Button for Tracking
-tracking_button = Button(win, text="Tracking", height=1, width=10,
-                          bg='#F2B830',
-                          fg='#163e6c',
-                          font=('helvetica', 12, 'bold'),
-                          border=0, command=Tracking)
-tracking_button.place(x=660, y=350)
+tracking_button = Button(win, text="Tracking", height=1, width=10,bg='#F2B830',fg='#163e6c',font=('helvetica', 12, 'bold'), border=0, command=Tracking)
+tracking_button.place(x=660, y=500)
 
-takeoff_button = Button(win, text="TakeOff", height=1, width=10,
-                          bg='#F2B830',
-                          fg='#163e6c',
-                          font=('helvetica', 12, 'bold'),
-                          border=0, command=Takeoff)
-takeoff_button.place(x=660, y=380)
+takeoff_button = Button(win, text="TakeOff", height=1, width=10, bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Takeoff)
+takeoff_button.place(x=780, y=500)
+
+landing_button = Button(win, text="Landing", height=1, width=10, bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Landing)
+landing_button.place(x=900, y=500)
 
 # Button for closing
-exit_button = Button(win, text="Exit", height=1, width=10,
-                          bg='#F2B830',
-                          fg='#163e6c',
-                          font=('helvetica', 12, 'bold'),
-                          border=0, command=Close)
-exit_button.place(x=660, y=410)
+exit_button = Button(win, text="Exit", height=1, width=10,  bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Close)
+exit_button.place(x=1020, y=500)
+
+
 
 # Create a Matplotlib figure
-fig_rl = plt.Figure(figsize=(3, 2), dpi=100)
+
+# frame_graph =Frame(height = 100,width = 170,bg = "#FFFFFF")
+# frame_graph.place(x= 925, y= 330)
+
+fig_rl = plt.Figure(figsize=(3.5, 2), dpi=70)
 axis_rl = fig_rl.add_subplot(1, 1, 1)
 target_rl, = axis_rl.plot(x_rl, y_target_rl, color='blue', label='target 1')
 error_rl, = axis_rl.plot(x_rl, y_error_rl, color='red', label='error 1')
+axis_rl.legend(["target", "koreksi"], loc ="lower right")
+axis_rl.title.set_text("Grafik Yaw")
 
-fig_ud = plt.Figure(figsize=(3, 2), dpi=100)
+fig_ud = plt.Figure(figsize=(3.5, 2), dpi=70)
 axis_ud = fig_ud.add_subplot(1, 1, 1)
 target_ud, = axis_ud.plot(x_ud, y_target_ud, color='blue', label='target 1')
 error_ud, = axis_ud.plot(x_ud, y_error_ud, color='red', label='error 1')
+axis_ud.legend(["target", "koreksi"], loc ="lower right")
+axis_ud.title.set_text("Grafik Vertikal")
 
 # Set the axis limits
 axis_rl.set_xlim(0, 10)
@@ -384,12 +446,13 @@ def update_ud(frame):
     target_ud.set_data(x_ud, y_target_ud)
     error_ud.set_data(x_ud, y_error_ud)
 
+
 # Create a canvas to display the figure in Tkinter
 canvas_rl = FigureCanvasTkAgg(fig_rl, master=win)
-canvas_rl.get_tk_widget().place(x=1000, y=10)
+canvas_rl.get_tk_widget().place(x=925, y=180)
 
 canvas_ud = FigureCanvasTkAgg(fig_ud, master=win)
-canvas_ud.get_tk_widget().place(x=1000, y=250)
+canvas_ud.get_tk_widget().place(x=925, y=340)
 
 # Create an animation object
 rl = FuncAnimation(fig_rl, update_rl, interval=1)
