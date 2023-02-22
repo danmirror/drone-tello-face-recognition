@@ -22,9 +22,6 @@ is_drone = False
 pid_ud = PID()
 pid_rl = PID()
 
-fuzzy_ud = Fuzzy()
-fuzzy_rl = Fuzzy()
-
 if is_drone :
     myDrone = Drone()
 
@@ -44,29 +41,11 @@ def set_value():
     speed_ud = [int(ud_input1.get()), int(ud_input2.get())]
     speed_rl = [int(rl_input1.get()), int(rl_input2.get())]
 
-    arr_min = [int(negative_input1.get()), int(negative_input2.get()), int(negative_input3.get())]
-    arr_nor = [int(normal_input1.get()), int(normal_input2.get()), int(normal_input3.get())]
-    arr_max = [int(positive_input1.get()), int(positive_input2.get()), int(positive_input3.get())]
-
     pid_ud.set(float(kp_input.get()), float(ki_input.get()), float(kd_input.get()), speed_ud)
     pid_rl.set(float(kp_input.get()), float(ki_input.get()), float(kd_input.get()), speed_rl)
 
-    fuzzy_ud.set(arr_min, arr_nor, arr_max, speed_ud)
-    fuzzy_rl.set(arr_min, arr_nor, arr_max, speed_rl)
-
 def disable():
     tracking_button["state"] = "disabled"
-    negative_input1["state"] = "disabled"
-    negative_input2["state"] = "disabled"
-    negative_input3["state"] = "disabled"
-
-    normal_input1["state"] = "disabled"
-    normal_input2["state"] = "disabled"
-    normal_input3["state"] = "disabled"
-
-    positive_input1["state"] = "disabled"
-    positive_input2["state"] = "disabled"
-    positive_input3["state"] = "disabled"
 
     kp_input["state"] = "disabled"
     ki_input["state"] = "disabled"
@@ -76,8 +55,6 @@ def disable():
     ud_input1["state"] = "disabled"
     rl_input2["state"] = "disabled"
     ud_input2["state"] = "disabled"
-    comb_face["state"] = "disabled"
-    comb_control["state"] = "disabled"
 
 def Takeoff():
 
@@ -117,12 +94,8 @@ def Tracking():
 
         error_rl =  w // 2 -info[0][0] 
         
-        if control_value.get() == "PID" :
-            out_rl = pid_rl.update(error_rl)
-            print(" Output pid rl ", out_rl)
-        else:
-            out_rl = fuzzy_rl.update(error_rl)
-            print(" Output fuzzy rl ", out_rl)
+        out_rl = pid_rl.update(error_rl)
+        print(" Output pid rl ", out_rl)
 
         if is_drone :
             myDrone.control(0, 0, 0, out_rl)
@@ -142,12 +115,8 @@ def Tracking():
      #top down
     if info[0][1] != 0:
         error_ud =  h // 2 -info[0][1] 
-        if control_value.get() == "PID" :
-            out_ud = pid_ud.update(error_ud)
-            print(" Output pid ud ", out_ud)
-        else:
-            out_ud = fuzzy_ud.update(error_ud)
-            print(" Output fuzzy ud ", out_ud)
+        out_ud = pid_ud.update(error_ud)
+        print(" Output pid ud ", out_ud)
         
         if is_drone :
             myDrone.control(0, 0, out_ud, 0)
@@ -273,31 +242,6 @@ rl_input2 = tk.Entry(frame_speed)
 rl_input2.place(x=60, y=110, width=40)
 rl_input2.insert(0, 50)
 
-# ############################### Speed   ###############################
-# frame_speed =Frame(height = 70,width = 120,bg = "#FFFFFF", padx=5, pady=5)
-# frame_speed.place(x= 650, y= 280)
-
-# label_speed = ttk.Label(frame_speed, text="Speed", font='Helvetica 14 bold', background="#FFFFFF", foreground="#aaaaaa")
-# label_speed.place(x=0 , y=0)
-# label_rl = ttk.Label(frame_speed, text="RL")
-# label_rl.place(x=0 , y=20)
-# label_ud = ttk.Label(frame_speed, text="UD")
-# label_ud.place(x=0 , y=40)
-
-# rl_input1 = tk.Entry(frame_speed)
-# rl_input1.place(x=30, y=20, width=40)
-# rl_input1.insert(0, -50)
-# rl_input2 = tk.Entry(frame_speed)
-# rl_input2.place(x=70, y=20, width=40)
-# rl_input2.insert(0, 50)
-
-# ud_input1 = tk.Entry(frame_speed)
-# ud_input1.place(x=30, y=40, width=40)
-# ud_input1.insert(0, -50)
-# ud_input2 = tk.Entry(frame_speed)
-# ud_input2.place(x=70, y=40, width=40)
-# ud_input2.insert(0, 50)
-
 ############################### PID     ###############################
 frame_pid =Frame(height = 130,width = 140,bg = "#FFFFFF", padx=5, pady=5)
 frame_pid.place(x= 780, y= 180)
@@ -341,60 +285,6 @@ y_dis = Entry( frame_coor, width=8, font=('Arial', 14),textvariable=selectedY)
 y_dis.place(x=30, y=65)
 
 
-
-############################### Fuzzy   ###############################
-frame_fuzzy =Frame(height = 100,width = 170,bg = "#FFFFFF")
-frame_fuzzy.place(x= 780, y= 700)
-
-label_fuzzy = ttk.Label(frame_fuzzy, text="Fuzzy", font='Helvetica 14 bold', foreground="#aaaaaa")
-label_fuzzy.place(x=0 , y=0)
-label_kp = ttk.Label(frame_fuzzy, text="Negatif")
-label_kp.place(x=0 , y=30)
-label_ki = ttk.Label(frame_fuzzy, text="Normal")
-label_ki.place(x=0 , y=50)
-label_kd = ttk.Label(frame_fuzzy, text="Positif")
-label_kd.place(x=0 , y=70)
-
-negative_input1 = tk.Entry(frame_fuzzy)
-negative_input1.place(x=50, y=30, width=40)
-negative_input1.insert(0, -200)
-negative_input2 = tk.Entry(frame_fuzzy)
-negative_input2.place(x=90, y=30, width=40)
-negative_input2.insert(0, -150)
-negative_input3 = tk.Entry(frame_fuzzy)
-negative_input3.place(x=130, y=30, width=40)
-negative_input3.insert(0, 0)
-
-normal_input1 = tk.Entry(frame_fuzzy)
-normal_input1.place(x=50, y=50, width=40)
-normal_input1.insert(0, -150)
-normal_input2 = tk.Entry(frame_fuzzy)
-normal_input2.place(x=90, y=50, width=40)
-normal_input2.insert(0, 0)
-normal_input3 = tk.Entry(frame_fuzzy)
-normal_input3.place(x=130, y=50, width=40)
-normal_input3.insert(0, 150)
-
-positive_input1 = tk.Entry(frame_fuzzy)
-positive_input1.place(x=50, y=70, width=40)
-positive_input1.insert(0, 0)
-positive_input2 = tk.Entry(frame_fuzzy)
-positive_input2.place(x=90, y=70, width=40)
-positive_input2.insert(0, 150)
-positive_input3 = tk.Entry(frame_fuzzy)
-positive_input3.place(x=130, y=70, width=40)
-positive_input3.insert(0, 200)
-
-
-
-label_control = ttk.Label(text="Control Selection", font='Helvetica 12 bold', foreground="#aaaaaa")
-label_control.place(x=820 , y=700)
-
-comb_control = ttk.Combobox(win,textvariable=control_value, values=["PID","Fuzzy"], state="readonly", width=16)
-comb_control.current(0)
-comb_control.place (x=820 , y=720)
-
-
 # Button for Tracking
 tracking_button = Button(win, text="Tracking", height=1, width=10,bg='#F2B830',fg='#163e6c',font=('helvetica', 12, 'bold'), border=0, command=Tracking)
 tracking_button.place(x=660, y=500)
@@ -409,12 +299,6 @@ landing_button.place(x=900, y=500)
 exit_button = Button(win, text="Exit", height=1, width=10,  bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Close)
 exit_button.place(x=1020, y=500)
 
-
-
-# Create a Matplotlib figure
-
-# frame_graph =Frame(height = 100,width = 170,bg = "#FFFFFF")
-# frame_graph.place(x= 925, y= 330)
 
 fig_rl = plt.Figure(figsize=(3.5, 2), dpi=70)
 axis_rl = fig_rl.add_subplot(1, 1, 1)
