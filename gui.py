@@ -233,7 +233,7 @@ comb_face = ttk.Combobox(frame_face,textvariable=selected, values=["Dian","Yossi
 comb_face.current(0)
 comb_face.place (x=0 , y=20)
 
-############################### Baterry ###############################
+############################### Battery ###############################
 frame_bat =Frame(height = 40,width = 120,bg = "#FFFFFF", padx=5, pady=5)
 frame_bat.place(x= 650, y= 240)
 label_bat = ttk.Label(frame_bat, text="Battery", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
