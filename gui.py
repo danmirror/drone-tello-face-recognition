@@ -57,14 +57,14 @@ def disable():
     ud_input2["state"] = "disabled"
 
 def Takeoff():
-
     print("Takeoff")
     takeoff_button["state"] = "disabled"
     if is_drone :
         myDrone.takeoff()
 
 def Landing():
-    pass
+    if is_drone :
+        myDrone.landing()
 
 def Close():
     print("closed")
@@ -95,7 +95,7 @@ def Tracking():
         error_rl =  w // 2 -info[0][0] 
         
         out_rl = pid_rl.update(error_rl)
-        print(" Output pid rl ", out_rl)
+        # print(" Output pid rl ", out_rl)
 
         if is_drone :
             myDrone.control(0, 0, 0, out_rl)
@@ -107,7 +107,6 @@ def Tracking():
 
     else:
         pid_rl.clear()
-        fuzzy_rl.clear()
 
         if is_drone :
             myDrone.clear()
@@ -116,7 +115,7 @@ def Tracking():
     if info[0][1] != 0:
         error_ud =  h // 2 -info[0][1] 
         out_ud = pid_ud.update(error_ud)
-        print(" Output pid ud ", out_ud)
+        # print(" Output pid ud ", out_ud)
         
         if is_drone :
             myDrone.control(0, 0, out_ud, 0)
@@ -128,7 +127,6 @@ def Tracking():
 
     else:
         pid_ud.clear()
-        fuzzy_ud.clear()
 
         if is_drone :
             myDrone.clear()
@@ -157,8 +155,8 @@ control_value = tk.StringVar()
 battery_value = tk.StringVar()
 
 ############################### Title ###############################
-frame_title =Frame(height = 150,width = 680,bg = "#FFFFFF")
-frame_title.place(x= 0, y= 0)
+frame_title =Frame(height = 150,width = 680,bg = "#FFFFFF", padx=10, pady=10)
+frame_title.place(x= 5, y= 5)
 
 logo = Image.open("ui_data/ugm.png")
 logo_resize = logo.resize((150,140))
@@ -170,14 +168,17 @@ label_title = Label(frame_title, text="IMPLEMENTASI KENDALI PID PADA\n"
                     "QUADCOPTER UNTUK STABILISASI TRACKING\n"
                     "PADA SISTEM DETEKSI WAJAH MANUSIA\n"
                     "DENGAN METODE LBPH FACE RECOGNITION",
-                     fg="#aaaaaa", font="Helvetica 14 bold", width=50, height=5, anchor=CENTER)
+                     fg="#aaaaaa", bg = "#FFFFFF", font="Helvetica 14 bold", width=50, height=5, anchor=CENTER)
 label_title.place(x= 150, y= 0)
 
 ############################### Description ###############################
-frame_des =Frame(height = 150,width = 500,bg = "#FFFFFF")
-frame_des.place(x= 685, y= 0)
-label_des = Label(frame_des, text="IMPLEMENTASI KENDALI PID PADA\n",
-                     fg="#aaaaaa", font="Helvetica 14 bold", width=40, height=5, anchor=CENTER)
+frame_des =Frame(height = 150,width = 500,bg = "#FFFFFF", padx=30, pady=30)
+frame_des.place(x= 690, y= 5)
+label_des = Label(frame_des, text="Dirancang Oleh:\n"
+                    "Nama : Yossi Hasanah Putri A.Md.T\n"
+                    "NIM : 12/483718/SV/2077\n"
+                    "Prodi : Teknologi Rekayasa Instrumentasi dan Kontrol",
+                     fg="#aaaaaa",bg = "#FFFFFF", font="Helvetica 12", width=60, height=5, anchor=NW, justify="left")
 label_des.place(x= 0, y= 0)
 
 ############################### Image   ###############################
@@ -192,7 +193,7 @@ label.grid(row=0, column=0)
 
 
 ############################### Face    ###############################
-frame_face =Frame(height = 50,width = 120,bg = "#FFFFFF", padx=5, pady=5)
+frame_face =Frame(height = 60,width = 120,bg = "#FFFFFF", padx=5, pady=5)
 frame_face.place(x= 650, y= 180)
 
 label_face = ttk.Label(frame_face, text="Face Selection", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
@@ -204,7 +205,7 @@ comb_face.place (x=0 , y=20)
 
 ############################### Battery ###############################
 frame_bat =Frame(height = 40,width = 120,bg = "#FFFFFF", padx=5, pady=5)
-frame_bat.place(x= 650, y= 240)
+frame_bat.place(x= 650, y= 260)
 label_bat = ttk.Label(frame_bat, text="Battery", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
 label_bat.place(x=0 , y=0)
 
@@ -214,8 +215,8 @@ battery.place(x=60, y=0, width=40)
 
 
 ############################### Speed   ###############################
-frame_speed =Frame(height = 150,width = 120,bg = "#FFFFFF", padx=5, pady=5)
-frame_speed.place(x= 650, y= 300)
+frame_speed =Frame(height = 160,width = 120,bg = "#FFFFFF", padx=5, pady=5)
+frame_speed.place(x= 650, y= 320)
 
 label_speed = ttk.Label(frame_speed, text="Speed", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
 label_speed.place(x=0 , y=0)
@@ -243,7 +244,7 @@ rl_input2.place(x=60, y=110, width=40)
 rl_input2.insert(0, 50)
 
 ############################### PID     ###############################
-frame_pid =Frame(height = 130,width = 140,bg = "#FFFFFF", padx=5, pady=5)
+frame_pid =Frame(height = 150, width = 140,bg = "#FFFFFF", padx=5, pady=5)
 frame_pid.place(x= 780, y= 180)
 
 label_PID = ttk.Label(frame_pid, text="PID", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
@@ -267,8 +268,8 @@ kd_input.insert(0, 0.05)
 
 
 ############################### Face Coordinate   ###############################
-frame_coor =Frame(height = 110,width = 140,bg = "#FFFFFF", padx=5, pady=5)
-frame_coor.place(x= 780, y= 330)
+frame_coor =Frame(height = 130, width = 140,bg = "#FFFFFF", padx=5, pady=5)
+frame_coor.place(x= 780, y= 350)
 label_coor = ttk.Label(frame_coor, text="Face Coordinate", background ="#FFFFFF", font='Helvetica 12 bold', foreground="#aaaaaa")
 label_coor.place(x=0 , y=0)
 
@@ -287,17 +288,17 @@ y_dis.place(x=30, y=65)
 
 # Button for Tracking
 tracking_button = Button(win, text="Tracking", height=1, width=10,bg='#F2B830',fg='#163e6c',font=('helvetica', 12, 'bold'), border=0, command=Tracking)
-tracking_button.place(x=660, y=500)
+tracking_button.place(x=660, y=530)
 
 takeoff_button = Button(win, text="TakeOff", height=1, width=10, bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Takeoff)
-takeoff_button.place(x=780, y=500)
+takeoff_button.place(x=780, y=530)
 
 landing_button = Button(win, text="Landing", height=1, width=10, bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Landing)
-landing_button.place(x=900, y=500)
+landing_button.place(x=900, y=530)
 
 # Button for closing
 exit_button = Button(win, text="Exit", height=1, width=10,  bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Close)
-exit_button.place(x=1020, y=500)
+exit_button.place(x=1020, y=530)
 
 
 fig_rl = plt.Figure(figsize=(3.5, 2), dpi=70)
@@ -333,10 +334,10 @@ def update_ud(frame):
 
 # Create a canvas to display the figure in Tkinter
 canvas_rl = FigureCanvasTkAgg(fig_rl, master=win)
-canvas_rl.get_tk_widget().place(x=925, y=180)
+canvas_rl.get_tk_widget().place(x=930, y=180)
 
 canvas_ud = FigureCanvasTkAgg(fig_ud, master=win)
-canvas_ud.get_tk_widget().place(x=925, y=340)
+canvas_ud.get_tk_widget().place(x=930, y=340)
 
 # Create an animation object
 rl = FuncAnimation(fig_rl, update_rl, interval=1)
