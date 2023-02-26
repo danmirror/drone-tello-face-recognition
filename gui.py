@@ -18,6 +18,7 @@ is_drone = False
 is_face_selection = False
 
 state_running = False
+mode = False
 
 fuzzy_ud = Fuzzy()
 fuzzy_rl = Fuzzy()
@@ -74,6 +75,7 @@ def disable():
     rl_input2["state"] = "disabled"
     ud_input2["state"] = "disabled"
     comb_face["state"] = "disabled"
+    comb_mode["state"] = "disabled"
 
 def enable():
     negative_input1["state"] = "normal"
@@ -93,6 +95,7 @@ def enable():
     rl_input2["state"] = "normal"
     ud_input2["state"] = "normal"
     comb_face["state"] = "normal"
+    comb_mode["state"] = "normal"
 
 def Takeoff():
     global state_running
@@ -106,6 +109,12 @@ def Takeoff():
         takeoff_button["state"] = "disabled"
         tracking_button["state"] = "normal"
         
+        if(selected_mode.get() == "Realtime"):
+            print("using realtime mode")
+            mode = True
+        if selected_mode.get() == "Fuzzy":
+            print("using fuzzy scale mode")
+            mode = False
         set_value()
         disable()
         state_running = True
@@ -134,8 +143,8 @@ def Close():
 
 def Tracking():
     
-    global  y_error_rl, y_average_rl, y_error_ud, y_average_ud, y_error_speed_rl, y_error_speed_ud,state_running
-    mode = False
+    global  y_error_rl, y_average_rl, y_error_ud, y_average_ud, y_error_speed_rl, y_error_speed_ud,state_running, mode
+    
     if(state_running):
         if is_drone :
             frame = myDrone.get_frame( w, h)
@@ -219,6 +228,7 @@ selectedX = tk.StringVar()
 selectedY = tk.StringVar()
 control_value = tk.StringVar()
 battery_value = tk.StringVar()
+selected_mode = tk.StringVar()
 
 ############################### Title ###############################
 frame_title =Frame(height = 150,width = 680,bg = "#FFFFFF", padx=30, pady=30)
@@ -358,7 +368,7 @@ ud_input2.place(x=140, y=40, width=70)
 ud_input2.insert(0, 50)
 
 ############################### Battery ###############################
-frame_bat =Frame(height = 50,width = 230,bg = "#FFFFFF", padx=5, pady=5)
+frame_bat =Frame(height = 40,width = 230,bg = "#FFFFFF", padx=5, pady=5)
 frame_bat.place(x= 20, y= 590)
 label_bat = ttk.Label(frame_bat, text="Battery", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
 label_bat.place(x=0 , y=0)
@@ -366,6 +376,14 @@ label_bat.place(x=0 , y=0)
 battery = Entry(frame_bat,width=8, font=('Arial', 14),textvariable=battery_value)
 battery.place(x=70, y=0, width=120)
 
+############################## select mode ###########################
+frame_mode =Frame(height = 40,width = 230,bg = "#FFFFFF", padx=5, pady=5)
+frame_mode.place(x= 20, y=650)
+label_mode = ttk.Label(frame_mode, text="Mode", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
+label_mode.place(x=0 , y=0)
+comb_mode = ttk.Combobox(frame_mode,textvariable=selected_mode, values=["Realtime","Fuzzy"], state="readonly", width=15)
+comb_mode.current(0)
+comb_mode.place (x=70 , y=0)
 
 # Button for Tracking
 tracking_button = Button(win, text="Tracking", state="disabled", height=1, width=10,bg='#F2B830',fg='#163e6c',font=('helvetica', 12, 'bold'), border=0, command=Tracking)
