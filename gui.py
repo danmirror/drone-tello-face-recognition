@@ -15,9 +15,10 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
-is_drone = True
-is_face_selection = True
+is_drone = False
+is_face_selection = False
 
+state_running = False
 
 pid_ud = PID()
 pid_rl = PID()
@@ -46,7 +47,6 @@ def set_value():
     pid_rl.set(float(kp_input.get()), float(ki_input.get()), float(kd_input.get()), speed_rl)
 
 def disable():
-    tracking_button["state"] = "disabled"
 
     kp_input["state"] = "disabled"
     ki_input["state"] = "disabled"
@@ -56,16 +56,49 @@ def disable():
     ud_input1["state"] = "disabled"
     rl_input2["state"] = "disabled"
     ud_input2["state"] = "disabled"
+    comb_face["state"] = "disabled"
+
+
+def enable():
+    kp_input["state"] = "normal"
+    ki_input["state"] = "normal"
+    kd_input["state"] = "normal"
+
+    rl_input1["state"] = "normal"
+    ud_input1["state"] = "normal"
+    rl_input2["state"] = "normal"
+    ud_input2["state"] = "normal"
+    comb_face["state"] = "normal"
 
 def Takeoff():
-    print("Takeoff")
-    takeoff_button["state"] = "disabled"
-    if is_drone :
-        myDrone.takeoff()
+    global state_running
+    if not state_running: 
+        print("Takeoff")
+        
+        if is_drone :
+            myDrone.takeoff()
+
+        landing_button["state"] = "normal"
+        takeoff_button["state"] = "disabled"
+        tracking_button["state"] = "normal"
+        
+        set_value()
+        disable()
+        state_running = True
 
 def Landing():
-    if is_drone :
-        myDrone.landing()
+    global state_running
+    if state_running:
+        print("Landing")
+
+        if is_drone :
+            myDrone.landing()
+        
+        takeoff_button["state"] = "normal"
+        landing_button["state"] = "disabled"
+        tracking_button["state"] = "disabled"
+        enable()
+        state_running = False
 
 def Close():
     print("closed")
@@ -77,68 +110,66 @@ def Close():
 
 def Tracking():
     
-    global y_target_rl, y_error_rl, y_target_ud, y_error_ud
-
-    set_value()
-    disable()
-    if is_drone :
-        frame = myDrone.get_frame( w, h)
-        battery_value.set(str(myDrone.get_battery()) +"%")
-    else:
-        frame = face_rec.get_frame( w, h)
-
-    if is_face_selection:
-        frame, info = face_rec.find_face(frame, comb_face, selectedX, selectedY)
-    else:
-        frame , info = face_rec.find_face_all(frame)
-
-    #right left 
-    if info[0][0] != 0:
-
-        error_rl =  w // 2 -info[0][0] 
-        
-        out_rl = pid_rl.update(error_rl)
-        # print(" Output pid rl ", out_rl)
-
+    global y_target_rl, y_error_rl, y_target_ud, y_error_ud, state_running
+    if state_running:
         if is_drone :
-            myDrone.control(0, 0, 0, out_rl)
+            frame = myDrone.get_frame( w, h)
+            battery_value.set(str(myDrone.get_battery()) +"%")
+        else:
+            frame = face_rec.get_frame( w, h)
+
+        if is_face_selection:
+            frame, info = face_rec.find_face(frame, comb_face, selectedX, selectedY)
+        else:
+            frame , info = face_rec.find_face_all(frame)
+
+        #right left 
+        if info[0][0] != 0:
+
+            error_rl =  w // 2 -info[0][0] 
+            
+            out_rl = pid_rl.update(error_rl)
+            # print(" Output pid rl ", out_rl)
+
+            if is_drone :
+                myDrone.control(0, 0, 0, out_rl)
+            
+            y_target_rl = np.append(y_target_rl, 0)
+            y_target_rl = np.delete(y_target_rl, 0)
+            y_error_rl = np.append(y_error_rl, error_rl)
+            y_error_rl = np.delete(y_error_rl, 0)
+
+        else:
+            pid_rl.clear()
+
+            if is_drone :
+                myDrone.clear()
         
-        y_target_rl = np.append(y_target_rl, 0)
-        y_target_rl = np.delete(y_target_rl, 0)
-        y_error_rl = np.append(y_error_rl, error_rl)
-        y_error_rl = np.delete(y_error_rl, 0)
+        #top down
+        if info[0][1] != 0:
+            error_ud =  h // 2 -info[0][1] 
+            out_ud = pid_ud.update(error_ud)
+            # print(" Output pid ud ", out_ud)
+            
+            if is_drone :
+                myDrone.control(0, 0, out_ud, 0)
+            
+            y_target_ud = np.append(y_target_ud, 0)
+            y_target_ud = np.delete(y_target_ud, 0)
+            y_error_ud = np.append(y_error_ud, error_ud)
+            y_error_ud = np.delete(y_error_ud, 0)
 
-    else:
-        pid_rl.clear()
+        else:
+            pid_ud.clear()
 
-        if is_drone :
-            myDrone.clear()
-    
-     #top down
-    if info[0][1] != 0:
-        error_ud =  h // 2 -info[0][1] 
-        out_ud = pid_ud.update(error_ud)
-        # print(" Output pid ud ", out_ud)
-        
-        if is_drone :
-            myDrone.control(0, 0, out_ud, 0)
-        
-        y_target_ud = np.append(y_target_ud, 0)
-        y_target_ud = np.delete(y_target_ud, 0)
-        y_error_ud = np.append(y_error_ud, error_ud)
-        y_error_ud = np.delete(y_error_ud, 0)
+            if is_drone :
+                myDrone.clear()
 
-    else:
-        pid_ud.clear()
-
-        if is_drone :
-            myDrone.clear()
-
-    img = Image.fromarray(frame)
-    imgtk = ImageTk.PhotoImage(image=img)
-    label.imgtk = imgtk
-    label.configure(image=imgtk, background="#FFFFFF")
-    label.after(10, Tracking)
+        img = Image.fromarray(frame)
+        imgtk = ImageTk.PhotoImage(image=img)
+        label.imgtk = imgtk
+        label.configure(image=imgtk, background="#FFFFFF")
+        label.after(10, Tracking)
 
 
 
@@ -290,13 +321,13 @@ y_dis.place(x=30, y=65)
 
 
 # Button for Tracking
-tracking_button = Button(win, text="Tracking", height=1, width=10,bg='#F2B830',fg='#163e6c',font=('helvetica', 12, 'bold'), border=0, command=Tracking)
+tracking_button = Button(win, text="Tracking", state="disable", height=1, width=10,bg='#F2B830',fg='#163e6c',font=('helvetica', 12, 'bold'), border=0, command=Tracking)
 tracking_button.place(x=660, y=530)
 
 takeoff_button = Button(win, text="TakeOff", height=1, width=10, bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Takeoff)
 takeoff_button.place(x=780, y=530)
 
-landing_button = Button(win, text="Landing", height=1, width=10, bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Landing)
+landing_button = Button(win, text="Landing",state="disable", height=1, width=10, bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Landing)
 landing_button.place(x=900, y=530)
 
 # Button for closing
