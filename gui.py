@@ -76,37 +76,23 @@ def disable():
     comb_face["state"] = "disabled"
 
 def enable():
-    if negative_input1["state"] == "disabled":
-        negative_input1["state"] = "normal"
-    if negative_input2["state"] == "disabled":
-        negative_input2["state"] = "normal"
-    if negative_input3["state"] == "disabled":
-        negative_input3["state"] = "normal"
+    negative_input1["state"] = "normal"
+    negative_input2["state"] = "normal"
+    negative_input3["state"] = "normal"
 
-    if normal_input1["state"] == "disabled":
-        normal_input1["state"] = "normal"
-    if normal_input2["state"] == "disabled":
-        normal_input2["state"] = "normal"
-    if normal_input3["state"] == "disabled":
-        normal_input3["state"] = "normal"
+    normal_input1["state"] = "normal"
+    normal_input2["state"] = "normal"
+    normal_input3["state"] = "normal"
 
-    if positive_input1["state"] == "disabled":
-        positive_input1["state"] = "normal"
-    if positive_input2["state"] == "disabled":
-        positive_input2["state"] = "normal"
-    if positive_input3["state"] == "disabled":
-        positive_input3["state"] = "normal"
+    positive_input1["state"] = "normal"
+    positive_input2["state"] = "normal"
+    positive_input3["state"] = "normal"
 
-    if rl_input1["state"] == "disabled":
-        rl_input1["state"] = "normal"
-    if ud_input1["state"] == "disabled":
-        ud_input1["state"] = "normal"
-    if rl_input2["state"] == "disabled":
-        rl_input2["state"] = "normal"
-    if ud_input2["state"] == "disabled":
-        ud_input2["state"] = "normal"
-    if comb_face["state"] == "disabled":
-        comb_face["state"] = "normal"
+    rl_input1["state"] = "normal"
+    ud_input1["state"] = "normal"
+    rl_input2["state"] = "normal"
+    ud_input2["state"] = "normal"
+    comb_face["state"] = "normal"
 
 def Takeoff():
     global state_running
@@ -149,7 +135,7 @@ def Close():
 def Tracking():
     
     global  y_error_rl, y_average_rl, y_error_ud, y_average_ud, y_error_speed_rl, y_error_speed_ud,state_running
-    mode = True
+    mode = False
     if(state_running):
         if is_drone :
             frame = myDrone.get_frame( w, h)
@@ -168,8 +154,8 @@ def Tracking():
             error_rl =  w // 2 -info[0][0] 
         
             out_rl, ret_err_rl, ret_average_rl, ret_speed_rl = fuzzy_rl.update(error_rl, mode)
-            print(" Output fuzzy rl ", error_rl)
-            print(" Output fuzzy ret rl ", ret_err_rl)
+            # print(" Output fuzzy rl ", error_rl)
+            # print(" Output fuzzy ret rl ", ret_err_rl)
 
             if is_drone :
                 myDrone.control(0, 0, 0, out_rl)
@@ -192,8 +178,8 @@ def Tracking():
             error_ud =  h // 2 -info[0][1] 
         
             out_ud, ret_err_ud, ret_average_ud, ret_speed_ud  = fuzzy_ud.update(error_ud, mode)
-            print(" Output fuzzy ud ", error_ud)
-            print(" Output fuzzy ret ud ", ret_err_ud)
+            # print(" Output fuzzy ud ", error_ud)
+            # print(" Output fuzzy ret ud ", ret_err_ud)
         
             if is_drone :
                 myDrone.control(0, 0, out_ud, 0)
@@ -235,28 +221,27 @@ control_value = tk.StringVar()
 battery_value = tk.StringVar()
 
 ############################### Title ###############################
-frame_title =Frame(height = 150,width = 680,bg = "#FFFFFF")
+frame_title =Frame(height = 150,width = 680,bg = "#FFFFFF", padx=30, pady=30)
 frame_title.place(x= 0, y= 0)
 
 logo = Image.open("ui_data/ugm.png")
-logo_resize = logo.resize((150,140))
+logo_resize = logo.resize((120,100))
 img = ImageTk.PhotoImage(logo_resize)
 logoo = Label(frame_title, image=img,background ="#FFFFFF")
 logoo.image = img
 logoo.place(x= 0, y= 0)
-label_title = Label(frame_title, text="IMPLEMENTASI KENDALI PID PADA\n"
-                    "QUADCOPTER UNTUK STABILISASI TRACKING\n"
-                    "PADA SISTEM DETEKSI WAJAH MANUSIA\n"
-                    "DENGAN METODE LBPH FACE RECOGNITION",
-                     fg="#aaaaaa", bg = "#FFFFFF", font="Helvetica 14 bold", width=50, height=5, anchor=CENTER)
+label_title = Label(frame_title, text="Implementasi Kendali Fuzzy Logic Untuk Stabilisasi\n"
+                    "Pelacakan Pada Sistem Pengenalan Wajah Manusia Dengan\n"
+                    "Metode LBPH Face Recognition Pada Quadcopter Drone",
+                     fg="#aaaaaa", bg = "#FFFFFF", font="Helvetica 12 bold", width=50, height=5, anchor=CENTER)
 label_title.place(x= 150, y= 0)
 
 ############################### Description ###############################
 frame_des =Frame(height = 150,width = 520,bg = "#FFFFFF", padx=30, pady=30)
 frame_des.place(x= 685, y= 0)
-label_des = Label(frame_des, text="Dirancang Oleh:\n"
-                    "Nama : Yossi Hasanah Putri A.Md.T\n"
-                    "NIM : 12/483718/SV/2077\n"
+label_des = Label(frame_des, text="Oleh:\n"
+                    "Nama : Dian Lestari Puteri\n"
+                    "NIM : 21/483637/SV/20402\n"
                     "Prodi : Teknologi Rekayasa Instrumentasi dan Kontrol",
                      fg="#aaaaaa",bg = "#FFFFFF", font="Helvetica 12", width=60, height=5, anchor=NW, justify="left")
 label_des.place(x= 0, y= 0)
