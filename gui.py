@@ -140,7 +140,7 @@ def Tracking():
             y_error_rl = np.delete(y_error_rl, 0)
 
         else:
-            pid_rl.clear()
+            # pid_rl.clear()
 
             if is_drone :
                 myDrone.clear()
@@ -160,7 +160,7 @@ def Tracking():
             y_error_ud = np.delete(y_error_ud, 0)
 
         else:
-            pid_ud.clear()
+            # pid_ud.clear()
 
             if is_drone :
                 myDrone.clear()
