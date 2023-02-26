@@ -111,6 +111,7 @@ class Fuzzy:
 			ret_error	= current_error
 			ret_average = average_error
 			ret_speed	= -output
+			print("mode true")
 		else:
 			max_err = error_low
 			ret_error = self.negative[0]

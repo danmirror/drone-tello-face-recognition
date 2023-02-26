@@ -98,7 +98,7 @@ def enable():
     comb_mode["state"] = "normal"
 
 def Takeoff():
-    global state_running
+    global state_running, mode
     if not state_running: 
         print("Takeoff")
         
@@ -145,6 +145,7 @@ def Tracking():
     
     global  y_error_rl, y_average_rl, y_error_ud, y_average_ud, y_error_speed_rl, y_error_speed_ud,state_running, mode
     
+    print(mode)
     if(state_running):
         if is_drone :
             frame = myDrone.get_frame( w, h)
