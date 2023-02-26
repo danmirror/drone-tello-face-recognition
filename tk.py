@@ -1,10 +1,18 @@
-from tkinter import *   
-from tkinter import ttk
-win = Tk()
-win.geometry("1200x680")
-fm =Frame(height = 100,width = 640,bg = "#FFFFFF")
-fm.place(x= 150, y= 0)
+import tkinter as tk
 
-label_PID = ttk.Label(fm, text="PID", font='Helvetica 14 bold', foreground="#aaaaaa")
-label_PID.place(x=0 , y=10)
-win.mainloop() 
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+
+        self.user_input = tk.Entry(self)
+        self.user_input.pack()
+
+        self.submit_button = tk.Button(self, text="Submit", command=self.submit_data)
+        self.submit_button.pack()
+
+    def submit_data(self):
+        user_data = self.user_input.get()
+        print("User data:", user_data)
+
+app = App()
+app.mainloop()

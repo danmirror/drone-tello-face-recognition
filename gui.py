@@ -14,10 +14,10 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-
-w, h = 640, 480
-
 is_drone = False
+is_face_selection = False
+
+state_running = False
 
 fuzzy_ud = Fuzzy()
 fuzzy_rl = Fuzzy()
@@ -28,18 +28,22 @@ if is_drone :
 face_rec = Face_Recognition()
 
 
+w, h = 640, 480
 # data
 x_rl = np.linspace(0,10,50)
 y_target_rl = np.zeros(len(x_rl))
 y_error_rl = np.zeros(len(x_rl))
+y_average_rl = np.zeros(len(x_rl))
 
 x_ud = np.linspace(0,10,50)
 y_target_ud = np.zeros(len(x_ud))
 y_error_ud = np.zeros(len(x_ud))
+y_average_ud = np.zeros(len(x_ud))
 
 x_speed = np.linspace(0,10,50)
 y_target_speed = np.zeros(len(x_speed))
-y_error_speed = np.zeros(len(x_ud))
+y_error_speed_ud = np.zeros(len(x_speed))
+y_error_speed_rl = np.zeros(len(x_speed))
 
 def set_value():
     speed_ud = [int(ud_input1.get()), int(ud_input2.get())]
@@ -53,7 +57,6 @@ def set_value():
     fuzzy_rl.set(arr_min, arr_nor, arr_max, speed_rl)
 
 def disable():
-    tracking_button["state"] = "disabled"
     negative_input1["state"] = "disabled"
     negative_input2["state"] = "disabled"
     negative_input3["state"] = "disabled"
@@ -72,15 +75,68 @@ def disable():
     ud_input2["state"] = "disabled"
     comb_face["state"] = "disabled"
 
+def enable():
+    if negative_input1["state"] == "disabled":
+        negative_input1["state"] = "normal"
+    if negative_input2["state"] == "disabled":
+        negative_input2["state"] = "normal"
+    if negative_input3["state"] == "disabled":
+        negative_input3["state"] = "normal"
+
+    if normal_input1["state"] == "disabled":
+        normal_input1["state"] = "normal"
+    if normal_input2["state"] == "disabled":
+        normal_input2["state"] = "normal"
+    if normal_input3["state"] == "disabled":
+        normal_input3["state"] = "normal"
+
+    if positive_input1["state"] == "disabled":
+        positive_input1["state"] = "normal"
+    if positive_input2["state"] == "disabled":
+        positive_input2["state"] = "normal"
+    if positive_input3["state"] == "disabled":
+        positive_input3["state"] = "normal"
+
+    if rl_input1["state"] == "disabled":
+        rl_input1["state"] = "normal"
+    if ud_input1["state"] == "disabled":
+        ud_input1["state"] = "normal"
+    if rl_input2["state"] == "disabled":
+        rl_input2["state"] = "normal"
+    if ud_input2["state"] == "disabled":
+        ud_input2["state"] = "normal"
+    if comb_face["state"] == "disabled":
+        comb_face["state"] = "normal"
+
 def Takeoff():
-    print("Takeoff")
-    takeoff_button["state"] = "disabled"
-    if is_drone :
-        myDrone.takeoff()
+    global state_running
+    if not state_running: 
+        print("Takeoff")
+        
+        if is_drone :
+            myDrone.takeoff()
+
+        landing_button["state"] = "normal"
+        takeoff_button["state"] = "disabled"
+        tracking_button["state"] = "normal"
+        
+        set_value()
+        disable()
+        state_running = True
 
 def Landing():
-    if is_drone :
-        myDrone.landing()
+    global state_running
+    if state_running:
+        print("Landing")
+
+        if is_drone :
+            myDrone.landing()
+        
+        takeoff_button["state"] = "normal"
+        landing_button["state"] = "disabled"
+        tracking_button["state"] = "disabled"
+        enable()
+        state_running = False
 
 def Close():
     print("closed")
@@ -92,67 +148,74 @@ def Close():
 
 def Tracking():
     
-    global y_target_rl, y_error_rl, y_target_ud, y_error_ud
-
-    set_value()
-    disable()
-    if is_drone :
-        frame = myDrone.get_frame( w, h)
-        battery_value.set(str(myDrone.get_battery()) +"%")
-    else:
-        frame = face_rec.get_frame( w, h)
-
-    frame , info = face_rec.find_face_all(frame)
-    # frame, info = face_rec.find_face(frame, comb_face, selectedX, selectedY)
-
-    #right left 
-    if info[0][0] != 0:
-
-        error_rl =  w // 2 -info[0][0] 
-       
-        out_rl = fuzzy_rl.update(error_rl)
-        print(" Output fuzzy rl ", out_rl)
-
+    global  y_error_rl, y_average_rl, y_error_ud, y_average_ud, y_error_speed_rl, y_error_speed_ud,state_running
+    mode = True
+    if(state_running):
         if is_drone :
-            myDrone.control(0, 0, 0, out_rl)
+            frame = myDrone.get_frame( w, h)
+            battery_value.set(str(myDrone.get_battery()) +"%")
+        else:
+            frame = face_rec.get_frame( w, h)
+
+        if is_face_selection:
+            frame, info = face_rec.find_face(frame, comb_face, selectedX, selectedY)
+        else:
+            frame , info = face_rec.find_face_all(frame)
+
+        #right left 
+        if info[0][0] != 0:
+
+            error_rl =  w // 2 -info[0][0] 
         
-        y_target_rl = np.append(y_target_rl, 0)
-        y_target_rl = np.delete(y_target_rl, 0)
-        y_error_rl = np.append(y_error_rl, error_rl)
-        y_error_rl = np.delete(y_error_rl, 0)
+            out_rl, ret_err_rl, ret_average_rl, ret_speed_rl = fuzzy_rl.update(error_rl, mode)
+            print(" Output fuzzy rl ", error_rl)
+            print(" Output fuzzy ret rl ", ret_err_rl)
 
-    else:
-        fuzzy_rl.clear()
+            if is_drone :
+                myDrone.control(0, 0, 0, out_rl)
+            
+            y_error_rl = np.append(y_error_rl, ret_err_rl)
+            y_error_rl = np.delete(y_error_rl, 0)
+            y_average_rl = np.append(y_average_rl, ret_average_rl)
+            y_average_rl = np.delete(y_average_rl, 0)
+            y_error_speed_rl = np.append(y_error_speed_rl, ret_speed_rl)
+            y_error_speed_rl = np.delete(y_error_speed_rl, 0)
 
-        if is_drone :
-            myDrone.clear()
-    
-     #top down
-    if info[0][1] != 0:
-        error_ud =  h // 2 -info[0][1] 
-       
-        out_ud = fuzzy_ud.update(error_ud)
-        print(" Output fuzzy ud ", out_ud)
-    
-        if is_drone :
-            myDrone.control(0, 0, out_ud, 0)
+        else:
+            # fuzzy_rl.clear()
+
+            if is_drone :
+                myDrone.clear()
         
-        y_target_ud = np.append(y_target_ud, 0)
-        y_target_ud = np.delete(y_target_ud, 0)
-        y_error_ud = np.append(y_error_ud, error_ud)
-        y_error_ud = np.delete(y_error_ud, 0)
+        #top down
+        if info[0][1] != 0:
+            error_ud =  h // 2 -info[0][1] 
+        
+            out_ud, ret_err_ud, ret_average_ud, ret_speed_ud  = fuzzy_ud.update(error_ud, mode)
+            print(" Output fuzzy ud ", error_ud)
+            print(" Output fuzzy ret ud ", ret_err_ud)
+        
+            if is_drone :
+                myDrone.control(0, 0, out_ud, 0)
+            
+            y_error_ud = np.append(y_error_ud, ret_err_ud)
+            y_error_ud = np.delete(y_error_ud, 0)
+            y_average_ud = np.append(y_average_ud, ret_average_ud)
+            y_average_ud = np.delete(y_average_ud, 0)
+            y_error_speed_ud = np.append(y_error_speed_ud, ret_speed_ud)
+            y_error_speed_ud = np.delete(y_error_speed_ud, 0)
 
-    else:
-        fuzzy_ud.clear()
+        else:
+            # fuzzy_ud.clear()
 
-        if is_drone :
-            myDrone.clear()
+            if is_drone :
+                myDrone.clear()
 
-    img = Image.fromarray(frame)
-    imgtk = ImageTk.PhotoImage(image=img)
-    label.imgtk = imgtk
-    label.configure(image=imgtk, background="#FFFFFF")
-    label.after(10, Tracking)
+        img = Image.fromarray(frame)
+        imgtk = ImageTk.PhotoImage(image=img)
+        label.imgtk = imgtk
+        label.configure(image=imgtk, background="#FFFFFF")
+        label.after(10, Tracking)
 
 
 
@@ -320,13 +383,13 @@ battery.place(x=70, y=0, width=120)
 
 
 # Button for Tracking
-tracking_button = Button(win, text="Tracking", height=1, width=10,bg='#F2B830',fg='#163e6c',font=('helvetica', 12, 'bold'), border=0, command=Tracking)
+tracking_button = Button(win, text="Tracking", state="disabled", height=1, width=10,bg='#F2B830',fg='#163e6c',font=('helvetica', 12, 'bold'), border=0, command=Tracking)
 tracking_button.place(x=270, y=650)
 
 takeoff_button = Button(win, text="TakeOff", height=1, width=10, bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Takeoff)
 takeoff_button.place(x=440, y=650)
 
-landing_button = Button(win, text="Landing", height=1, width=10, bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Landing)
+landing_button = Button(win, text="Landing", state="disabled", height=1, width=10, bg='#F2B830', fg='#163e6c', font=('helvetica', 12, 'bold'), border=0, command=Landing)
 landing_button.place(x=630, y=650)
 
 # Button for closing
@@ -338,22 +401,25 @@ fig_rl = plt.Figure(figsize=(3.5, 2), dpi=70)
 axis_rl = fig_rl.add_subplot(1, 1, 1)
 target_rl, = axis_rl.plot(x_rl, y_target_rl, color='blue', label='target 1')
 error_rl, = axis_rl.plot(x_rl, y_error_rl, color='red', label='error 1')
-axis_rl.legend(["target", "koreksi"], loc ="lower right")
+average_rl, = axis_rl.plot(x_rl, y_average_rl, color='yellow', label='error 2')
+axis_rl.legend(["T","E","A"], loc ="lower right")
 axis_rl.title.set_text("Grafik Yaw")
 
 fig_ud = plt.Figure(figsize=(3.5, 2), dpi=70)
 axis_ud = fig_ud.add_subplot(1, 1, 1)
 target_ud, = axis_ud.plot(x_ud, y_target_ud, color='blue', label='target 1')
 error_ud, = axis_ud.plot(x_ud, y_error_ud, color='red', label='error 1')
-axis_ud.legend(["target", "koreksi"], loc ="lower right")
+average_ud, = axis_ud.plot(x_ud, y_average_ud, color='yellow', label='error 2')
+axis_ud.legend(["T","E","A"], loc ="lower right")
 axis_ud.title.set_text("Grafik Vertikal")
 
 fig_speed = plt.Figure(figsize=(3.5, 2), dpi=70)
 axis_speed = fig_speed.add_subplot(1, 1, 1)
 target_speed, = axis_speed.plot(x_speed, y_target_speed, color='blue', label='target 1')
-error_speed, = axis_speed.plot(x_speed, y_error_speed, color='red', label='error 1')
-axis_speed.legend(["target", "koreksi"], loc ="lower right")
-axis_speed.title.set_text("Grafik Vertikal")
+error_speed_rl, = axis_speed.plot(x_speed, y_error_speed_rl, color='red', label='error 1')
+error_speed_ud, = axis_speed.plot(x_speed, y_error_speed_ud, color='yellow', label='error 2')
+axis_speed.legend(["T","RL","UD"], loc ="lower right")
+axis_speed.title.set_text("Grafik Speed")
 
 
 # Set the axis limits
@@ -363,18 +429,21 @@ axis_rl.set_ylim(-320, 320)
 axis_ud.set_xlim(0, 10)
 axis_ud.set_ylim(-320, 320)
 
-# Define the update function
-def update_error(frame):
-    target_rl.set_data(x_rl, y_target_rl)
-    error_rl.set_data(x_rl, y_error_rl)
+axis_speed.set_xlim(0, 10)
+axis_speed.set_ylim(-50, 50)
 
-def update_average(frame):
-    target_ud.set_data(x_ud, y_target_ud)
+# Define the update function
+def update_rl(frame):
+    error_rl.set_data(x_rl, y_error_rl)
+    average_rl.set_data(x_rl, y_average_rl)
+
+def update_ud(frame):
     error_ud.set_data(x_ud, y_error_ud)
+    average_ud.set_data(x_rl, y_average_ud)
 
 def update_speed(frame):
-    target_ud.set_data(x_ud, y_target_ud)
-    error_ud.set_data(x_ud, y_error_ud)
+    error_speed_rl.set_data(x_speed, y_error_speed_rl)
+    error_speed_ud.set_data(x_speed, y_error_speed_ud)
 
 
 
@@ -389,9 +458,9 @@ canvas_speed = FigureCanvasTkAgg(fig_speed, master=win)
 canvas_speed.get_tk_widget().place(x=930, y=500)
 
 # Create an animation object
-e = FuncAnimation(fig_rl, update_error, interval=1)
-a = FuncAnimation(fig_ud, update_average, interval=1)
-s = FuncAnimation(fig_ud, update_speed, interval=1)
+e = FuncAnimation(fig_rl, update_rl, interval=10)
+a = FuncAnimation(fig_ud, update_ud, interval=10)
+s = FuncAnimation(fig_speed, update_speed, interval=10)
 
 
 win.mainloop()

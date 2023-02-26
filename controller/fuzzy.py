@@ -15,10 +15,10 @@ condition
 -----------------------------
 speed
 ________        __________
-		\      /
-		 \    /
-		  \  /
-		   \/
+		\  /\  /
+		 \/  \/
+		 /\  /\
+________/__\/__\__________
     -50    0    50
 
 '''
@@ -51,11 +51,11 @@ class Fuzzy:
 		else:
 			return 0
 
-	def update(self, current_error):
+	def update(self, current_error, mode):
 
 		average_error = (current_error + self.previous_error) //2  
 		self.previous_error = current_error
-		
+
 		# Fuzzyfication
 		# Membership function for error
 		error_low 		= self.triangular_mf(current_error, self.negative[0], self.normal[0], self.positive[0])
@@ -98,4 +98,11 @@ class Fuzzy:
 		output = 0
 		if not total_weight ==  0:
 			output = defuzzified_value / total_weight
-		return int(-output)
+		
+		
+		# data return
+		ret_error	= current_error
+		ret_average = average_error
+		ret_speed	= -output
+
+		return int(-output),ret_error,ret_average,ret_speed
