@@ -15,9 +15,9 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
-w, h = 640, 480
+is_drone = True
+is_face_selection = True
 
-is_drone = False
 
 pid_ud = PID()
 pid_rl = PID()
@@ -27,6 +27,7 @@ if is_drone :
 
 face_rec = Face_Recognition()
 
+w, h = 640, 480
 
 # data
 x_rl = np.linspace(0,10,50)
@@ -86,8 +87,10 @@ def Tracking():
     else:
         frame = face_rec.get_frame( w, h)
 
-    frame , info = face_rec.find_face_all(frame)
-    # frame, info = face_rec.find_face(frame, comb_face, selectedX, selectedY)
+    if is_face_selection:
+        frame, info = face_rec.find_face(frame, comb_face, selectedX, selectedY)
+    else:
+        frame , info = face_rec.find_face_all(frame)
 
     #right left 
     if info[0][0] != 0:
