@@ -18,6 +18,8 @@ class Face_Recognition:
 	font = cv2.FONT_HERSHEY_SIMPLEX
 
 	def __init__(self):
+		self.width=0
+		self.height=0
 		print("Initial Face")
 
 
@@ -25,6 +27,9 @@ class Face_Recognition:
 		ret, frame = self.cap.read()
 		frame = cv2.flip(frame, 1)
 		frame = cv2.resize(frame, (w, h))
+		self.width=w
+		self.height=h
+
 		cv2.line(img=frame, pt1=(0, h//2), pt2=(w, h//2), color=(255, 255, 255), thickness=1, lineType=8, shift=0)
 		cv2.line(img=frame, pt1=(w//2, 0), pt2=(w//2,h), color=(255, 255, 255), thickness=1, lineType=8, shift=0)
 		return frame
@@ -39,6 +44,10 @@ class Face_Recognition:
 
 		for (x, y, w, h) in faces:
 			cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+
+			cv2.rectangle(frame, (self.width//2, self.height//2), (x+(w//2), y+(h//2)), (255, 255, 255), 1)
+			cv2.circle(frame, (x+(w//2),y+(h//2)), radius=0, color=(0, 255, 255), thickness=5)
+			
 			cx = x + w // 2
 			cy = y + h // 2
 			area = w * h
@@ -106,6 +115,10 @@ class Face_Recognition:
 				cv2.putText(frame, str(id), (x + 5, y - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 				cv2.putText(frame, str(confidence), (x + 5, y + h - 5), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 1)
 				
+
+				cv2.rectangle(frame, (self.width//2, self.height//2), (x+(w//2), y+(h//2)), (255, 255, 255), 1)
+				cv2.circle(frame, (x+(w//2),y+(h//2)), radius=0, color=(0, 255, 255), thickness=5)
+
 				# Insert value
 				cx = x + w // 2
 				cy = y + h // 2
