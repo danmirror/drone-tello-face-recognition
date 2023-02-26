@@ -25,6 +25,8 @@ class Drone:
 		frame = self.frame.frame
 		frame = cv2.flip(frame, 1)
 		frame = cv2.resize(frame, (w, h))
+		cv2.line(img=frame, pt1=(0, h//2), pt2=(w, h//2), color=(255, 255, 255), thickness=1, lineType=8, shift=0)
+		cv2.line(img=frame, pt1=(w//2, 0), pt2=(w//2,h), color=(255, 255, 255), thickness=1, lineType=8, shift=0)
 		return frame
 
 	def get_drone(self):

@@ -25,6 +25,8 @@ class Face_Recognition:
 		ret, frame = self.cap.read()
 		frame = cv2.flip(frame, 1)
 		frame = cv2.resize(frame, (w, h))
+		cv2.line(img=frame, pt1=(0, h//2), pt2=(w, h//2), color=(255, 255, 255), thickness=1, lineType=8, shift=0)
+		cv2.line(img=frame, pt1=(w//2, 0), pt2=(w//2,h), color=(255, 255, 255), thickness=1, lineType=8, shift=0)
 		return frame
 	
 	def find_face_all(self, frame):
@@ -52,6 +54,7 @@ class Face_Recognition:
 	def find_face(self, frame, comb_face, selectedX, selectedY):
 		# frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 		gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+		
 		faces = self.faceCascade.detectMultiScale(
 			gray,
 			scaleFactor=1.35,
