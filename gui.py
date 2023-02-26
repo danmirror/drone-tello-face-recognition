@@ -349,9 +349,9 @@ frame_speed.place(x= 20, y= 490)
 
 label_speed = ttk.Label(frame_speed, text="Speed", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
 label_speed.place(x=0 , y=0)
-label_rl = ttk.Label(frame_speed, text="RL")
+label_rl = ttk.Label(frame_speed, text="RL", background ="#FFFFFF")
 label_rl.place(x=0 , y=20)
-label_ud = ttk.Label(frame_speed, text="UD")
+label_ud = ttk.Label(frame_speed, text="UD", background ="#FFFFFF")
 label_ud.place(x=0 , y=40)
 
 rl_input1 = tk.Entry(frame_speed)
