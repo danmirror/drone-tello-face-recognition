@@ -169,7 +169,7 @@ def Tracking():
         imgtk = ImageTk.PhotoImage(image=img)
         label.imgtk = imgtk
         label.configure(image=imgtk, background="#FFFFFF")
-        label.after(10, Tracking)
+        label.after(1, Tracking)
 
 
 
@@ -360,10 +360,12 @@ axis_ud.set_ylim(-320, 320)
 def update_rl(frame):
     target_rl.set_data(x_rl, y_target_rl)
     error_rl.set_data(x_rl, y_error_rl)
+    return target_rl, error_rl
 
 def update_ud(frame):
     target_ud.set_data(x_ud, y_target_ud)
     error_ud.set_data(x_ud, y_error_ud)
+    return target_ud, error_ud
 
 
 # Create a canvas to display the figure in Tkinter
@@ -374,8 +376,8 @@ canvas_ud = FigureCanvasTkAgg(fig_ud, master=win)
 canvas_ud.get_tk_widget().place(x=930, y=340)
 
 # Create an animation object
-rl = FuncAnimation(fig_rl, update_rl, interval=1)
-ud = FuncAnimation(fig_ud, update_ud, interval=1)
+rl = FuncAnimation(fig_rl, update_rl, interval=0, blit=True)
+ud = FuncAnimation(fig_ud, update_ud, interval=0, blit=True)
 
 
 win.mainloop()
