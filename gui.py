@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-is_drone = False
-is_face_selection = False
+is_drone = True
+is_face_selection = True
 
 state_running = False
 mode = False
@@ -145,7 +145,6 @@ def Tracking():
     
     global  y_error_rl, y_average_rl, y_error_ud, y_average_ud, y_error_speed_rl, y_error_speed_ud,state_running, mode
     
-    print(mode)
     if(state_running):
         if is_drone :
             frame = myDrone.get_frame( w, h)
@@ -211,7 +210,7 @@ def Tracking():
         imgtk = ImageTk.PhotoImage(image=img)
         label.imgtk = imgtk
         label.configure(image=imgtk, background="#FFFFFF")
-        label.after(10, Tracking)
+        label.after(1, Tracking)
 
 
 
@@ -440,16 +439,17 @@ axis_speed.set_ylim(-50, 50)
 def update_rl(frame):
     error_rl.set_data(x_rl, y_error_rl)
     average_rl.set_data(x_rl, y_average_rl)
+    return error_rl, average_rl
 
 def update_ud(frame):
     error_ud.set_data(x_ud, y_error_ud)
     average_ud.set_data(x_rl, y_average_ud)
+    return error_ud, average_ud
 
 def update_speed(frame):
     error_speed_rl.set_data(x_speed, y_error_speed_rl)
     error_speed_ud.set_data(x_speed, y_error_speed_ud)
-
-
+    return error_speed_rl, error_speed_ud
 
 # Create a canvas to display the figure in Tkinter
 canvas_rl = FigureCanvasTkAgg(fig_rl, master=win)
@@ -462,9 +462,9 @@ canvas_speed = FigureCanvasTkAgg(fig_speed, master=win)
 canvas_speed.get_tk_widget().place(x=930, y=500)
 
 # Create an animation object
-e = FuncAnimation(fig_rl, update_rl, interval=10)
-a = FuncAnimation(fig_ud, update_ud, interval=10)
-s = FuncAnimation(fig_speed, update_speed, interval=10)
+e = FuncAnimation(fig_rl, update_rl, interval=0, blit=True)
+a = FuncAnimation(fig_ud, update_ud, interval=0, blit=True)
+s = FuncAnimation(fig_speed, update_speed, interval=0, blit=True)
 
 
 win.mainloop()
