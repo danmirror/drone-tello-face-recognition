@@ -54,8 +54,12 @@ def set_value():
     arr_nor = [int(normal_input1.get()), int(normal_input2.get()), int(normal_input3.get())]
     arr_max = [int(positive_input1.get()), int(positive_input2.get()), int(positive_input3.get())]
 
-    fuzzy_ud.set(arr_min, arr_nor, arr_max, speed_ud)
-    fuzzy_rl.set(arr_min, arr_nor, arr_max, speed_rl)
+    d_arr_min = [int(d_negative_input1.get()), int(d_negative_input2.get()), int(d_negative_input3.get())]
+    d_arr_nor = [int(d_normal_input1.get()), int(d_normal_input2.get()), int(d_normal_input3.get())]
+    d_arr_max = [int(d_positive_input1.get()), int(d_positive_input2.get()), int(d_positive_input3.get())]
+
+    fuzzy_ud.set(arr_min, arr_nor, arr_max, d_arr_min, d_arr_nor, d_arr_max, speed_ud)
+    fuzzy_rl.set(arr_min, arr_nor, arr_max, d_arr_min, d_arr_nor, d_arr_max, speed_rl)
 
 def disable():
     negative_input1["state"] = "disabled"
@@ -182,29 +186,29 @@ def Tracking():
             if is_drone :
                 myDrone.clear()
         
-        # #top down
-        # if info[0][1] != 0:
-        #     error_ud =  h // 2 -info[0][1] 
+        #top down
+        if info[0][1] != 0:
+            error_ud =  h // 2 -info[0][1] 
         
-        #     out_ud, ret_err_ud, ret_average_ud, ret_speed_ud  = fuzzy_ud.update(error_ud, mode)
-        #     # print(" Output fuzzy ud ", error_ud)
-        #     # print(" Output fuzzy ret ud ", ret_err_ud)
+            out_ud, ret_err_ud, ret_average_ud, ret_speed_ud  = fuzzy_ud.update(error_ud, mode)
+            # print(" Output fuzzy ud ", error_ud)
+            # print(" Output fuzzy ret ud ", ret_err_ud)
         
-        #     if is_drone :
-        #         myDrone.control(0, 0, out_ud, 0)
+            if is_drone :
+                myDrone.control(0, 0, out_ud, 0)
             
-        #     y_error_ud = np.append(y_error_ud, ret_err_ud)
-        #     y_error_ud = np.delete(y_error_ud, 0)
-        #     y_average_ud = np.append(y_average_ud, ret_average_ud)
-        #     y_average_ud = np.delete(y_average_ud, 0)
-        #     y_error_speed_ud = np.append(y_error_speed_ud, ret_speed_ud)
-        #     y_error_speed_ud = np.delete(y_error_speed_ud, 0)
+            y_error_ud = np.append(y_error_ud, ret_err_ud)
+            y_error_ud = np.delete(y_error_ud, 0)
+            y_average_ud = np.append(y_average_ud, ret_average_ud)
+            y_average_ud = np.delete(y_average_ud, 0)
+            y_error_speed_ud = np.append(y_error_speed_ud, ret_speed_ud)
+            y_error_speed_ud = np.delete(y_error_speed_ud, 0)
 
-        # else:
-        #     # fuzzy_ud.clear()
+        else:
+            # fuzzy_ud.clear()
 
-        #     if is_drone :
-        #         myDrone.clear()
+            if is_drone :
+                myDrone.clear()
 
         img = Image.fromarray(frame)
         imgtk = ImageTk.PhotoImage(image=img)
@@ -280,71 +284,115 @@ comb_face.current(0)
 comb_face.place (x=0 , y=20)
 
 ############################### Face Coordinate   ###############################
-frame_coor =Frame(height = 110,width = 230,bg = "#FFFFFF", padx=5, pady=5)
-frame_coor.place(x= 20, y= 230)
+frame_coor =Frame(height = 90,width = 230,bg = "#FFFFFF", padx=5, pady=5)
+frame_coor.place(x= 20, y= 220)
 label_coor = ttk.Label(frame_coor, text="Face Coordinate", background ="#FFFFFF", font='Helvetica 12 bold', foreground="#aaaaaa")
 label_coor.place(x=0 , y=0)
 
 label_x = ttk.Label(frame_coor, text="X =", background ="#FFFFFF")
-label_x.place(x=0 , y=30)
+label_x.place(x=0 , y=20)
 
 label_y = ttk.Label(frame_coor, text="Y =", background ="#FFFFFF")
-label_y.place(x=0 , y=65)
+label_y.place(x=0 , y=50)
 
 x_dis = Entry(frame_coor, width=12, font=('Arial', 14), textvariable=selectedX)
-x_dis.place(x=30, y=30)
+x_dis.place(x=30, y=20)
 
 y_dis = Entry( frame_coor, width=12, font=('Arial', 14),textvariable=selectedY)
-y_dis.place(x=30, y=65)
+y_dis.place(x=30, y=50)
 
 
 ############################### Fuzzy   ###############################
-frame_fuzzy =Frame(height = 110,width = 230,bg = "#FFFFFF", padx=5, pady=5)
-frame_fuzzy.place(x= 20, y= 360)
+frame_fuzzy =Frame(height = 100,width = 230,bg = "#FFFFFF", padx=5, pady=5)
+frame_fuzzy.place(x= 20, y= 320)
 
 label_fuzzy = ttk.Label(frame_fuzzy, text="Fuzzy", font='Helvetica 12 bold', foreground="#aaaaaa", background ="#FFFFFF")
 label_fuzzy.place(x=0 , y=0)
 label_kp = ttk.Label(frame_fuzzy, text="Negatif", background ="#FFFFFF")
-label_kp.place(x=0 , y=30)
+label_kp.place(x=0 , y=20)
 label_ki = ttk.Label(frame_fuzzy, text="Normal", background ="#FFFFFF")
-label_ki.place(x=0 , y=50)
+label_ki.place(x=0 , y=40)
 label_kd = ttk.Label(frame_fuzzy, text="Positif", background ="#FFFFFF")
-label_kd.place(x=0 , y=70)
+label_kd.place(x=0 , y=60)
 
 negative_input1 = tk.Entry(frame_fuzzy)
-negative_input1.place(x=70, y=30, width=50)
+negative_input1.place(x=70, y=20, width=50)
 negative_input1.insert(0, -200)
 negative_input2 = tk.Entry(frame_fuzzy)
-negative_input2.place(x=120, y=30, width=50)
+negative_input2.place(x=120, y=20, width=50)
 negative_input2.insert(0, -150)
 negative_input3 = tk.Entry(frame_fuzzy)
-negative_input3.place(x=170, y=30, width=50)
+negative_input3.place(x=170, y=20, width=50)
 negative_input3.insert(0, 0)
 
 normal_input1 = tk.Entry(frame_fuzzy)
-normal_input1.place(x=70, y=50, width=50)
+normal_input1.place(x=70, y=40, width=50)
 normal_input1.insert(0, -150)
 normal_input2 = tk.Entry(frame_fuzzy)
-normal_input2.place(x=120, y=50, width=50)
+normal_input2.place(x=120, y=40, width=50)
 normal_input2.insert(0, 0)
 normal_input3 = tk.Entry(frame_fuzzy)
-normal_input3.place(x=170, y=50, width=50)
+normal_input3.place(x=170, y=40, width=50)
 normal_input3.insert(0, 150)
 
 positive_input1 = tk.Entry(frame_fuzzy)
-positive_input1.place(x=70, y=70, width=50)
+positive_input1.place(x=70, y=60, width=50)
 positive_input1.insert(0, 0)
 positive_input2 = tk.Entry(frame_fuzzy)
-positive_input2.place(x=120, y=70, width=50)
+positive_input2.place(x=120, y=60, width=50)
 positive_input2.insert(0, 150)
 positive_input3 = tk.Entry(frame_fuzzy)
-positive_input3.place(x=170, y=70, width=50)
+positive_input3.place(x=170, y=60, width=50)
 positive_input3.insert(0, 200)
 
 
+
+frame_fuzzy =Frame(height = 100,width = 230,bg = "#FFFFFF", padx=5, pady=0)
+frame_fuzzy.place(x= 20, y= 420)
+
+d_label_fuzzy = ttk.Label(frame_fuzzy, text="Delta", font='Helvetica 12 bold', foreground="#aaaaaa", background ="#FFFFFF")
+d_label_fuzzy.place(x=0 , y=0)
+d_label_kp = ttk.Label(frame_fuzzy, text="Negatif", background ="#FFFFFF")
+d_label_kp.place(x=0 , y=20)
+d_label_ki = ttk.Label(frame_fuzzy, text="Normal", background ="#FFFFFF")
+d_label_ki.place(x=0 , y=40)
+d_label_kd = ttk.Label(frame_fuzzy, text="Positif", background ="#FFFFFF")
+d_label_kd.place(x=0 , y=60)
+
+d_negative_input1 = tk.Entry(frame_fuzzy)
+d_negative_input1.place(x=70, y=20, width=50)
+d_negative_input1.insert(0, -10)
+d_negative_input2 = tk.Entry(frame_fuzzy)
+d_negative_input2.place(x=120, y=20, width=50)
+d_negative_input2.insert(0, -5)
+d_negative_input3 = tk.Entry(frame_fuzzy)
+d_negative_input3.place(x=170, y=20, width=50)
+d_negative_input3.insert(0, 0)
+
+d_normal_input1 = tk.Entry(frame_fuzzy)
+d_normal_input1.place(x=70, y=40, width=50)
+d_normal_input1.insert(0, -5)
+d_normal_input2 = tk.Entry(frame_fuzzy)
+d_normal_input2.place(x=120, y=40, width=50)
+d_normal_input2.insert(0, 0)
+d_normal_input3 = tk.Entry(frame_fuzzy)
+d_normal_input3.place(x=170, y=40, width=50)
+d_normal_input3.insert(0, 5)
+
+d_positive_input1 = tk.Entry(frame_fuzzy)
+d_positive_input1.place(x=70, y=60, width=50)
+d_positive_input1.insert(0, 0)
+d_positive_input2 = tk.Entry(frame_fuzzy)
+d_positive_input2.place(x=120, y=60, width=50)
+d_positive_input2.insert(0, 5)
+d_positive_input3 = tk.Entry(frame_fuzzy)
+d_positive_input3.place(x=170, y=60, width=50)
+d_positive_input3.insert(0, 10)
+
+
 ############################### Speed   ###############################
-frame_speed =Frame(height = 80,width = 230,bg = "#FFFFFF", padx=5, pady=5)
-frame_speed.place(x= 20, y= 490)
+frame_speed =Frame(height = 70,width = 230,bg = "#FFFFFF", padx=5, pady=5)
+frame_speed.place(x= 20, y= 530)
 
 label_speed = ttk.Label(frame_speed, text="Speed", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
 label_speed.place(x=0 , y=0)
@@ -369,7 +417,7 @@ ud_input2.insert(0, 50)
 
 ############################### Battery ###############################
 frame_bat =Frame(height = 40,width = 230,bg = "#FFFFFF", padx=5, pady=5)
-frame_bat.place(x= 20, y= 590)
+frame_bat.place(x= 20, y= 610)
 label_bat = ttk.Label(frame_bat, text="Battery", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
 label_bat.place(x=0 , y=0)
 
@@ -377,8 +425,8 @@ battery = Entry(frame_bat,width=8, font=('Arial', 14),textvariable=battery_value
 battery.place(x=70, y=0, width=120)
 
 ############################## select mode ###########################
-frame_mode =Frame(height = 40,width = 230,bg = "#FFFFFF", padx=5, pady=5)
-frame_mode.place(x= 20, y=650)
+frame_mode =Frame(height = 30,width = 230,bg = "#FFFFFF", padx=5, pady=5)
+frame_mode.place(x= 20, y=660)
 label_mode = ttk.Label(frame_mode, text="Mode", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
 label_mode.place(x=0 , y=0)
 comb_mode = ttk.Combobox(frame_mode,textvariable=selected_mode, values=["Realtime","Fuzzy"], state="readonly", width=15)
@@ -405,7 +453,7 @@ axis_rl = fig_rl.add_subplot(1, 1, 1)
 target_rl, = axis_rl.plot(x_rl, y_target_rl, color='blue', label='target 1')
 error_rl, = axis_rl.plot(x_rl, y_error_rl, color='red', label='error 1')
 average_rl, = axis_rl.plot(x_rl, y_average_rl, color='yellow', label='error 2')
-axis_rl.legend(["T","E","A"], loc ="lower right")
+axis_rl.legend(["T","E","D"], loc ="lower right")
 axis_rl.title.set_text("Grafik Yaw")
 
 fig_ud = plt.Figure(figsize=(3.5, 2), dpi=70)
@@ -413,7 +461,7 @@ axis_ud = fig_ud.add_subplot(1, 1, 1)
 target_ud, = axis_ud.plot(x_ud, y_target_ud, color='blue', label='target 1')
 error_ud, = axis_ud.plot(x_ud, y_error_ud, color='red', label='error 1')
 average_ud, = axis_ud.plot(x_ud, y_average_ud, color='yellow', label='error 2')
-axis_ud.legend(["T","E","A"], loc ="lower right")
+axis_ud.legend(["T","E","D"], loc ="lower right")
 axis_ud.title.set_text("Grafik Vertikal")
 
 fig_speed = plt.Figure(figsize=(3.5, 2), dpi=70)

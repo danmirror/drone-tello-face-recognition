@@ -39,10 +39,16 @@ class Fuzzy:
 		self.positive = 0
 		self.speed = 0
 
-	def set(self, negative, normal, positive, speed):
+	def set(self, negative, normal, positive,
+					 d_low, d_normal, d_high, speed):
+
 		self.negative = negative
 		self.normal = normal
 		self.positive = positive
+		self.d_low = d_low
+		self.d_normal = d_normal
+		self.d_high = d_high
+
 		self.speed = speed
 	
 	def clear(self):
@@ -102,7 +108,7 @@ class Fuzzy:
 		if(current_error == 0):
 			current_error = 1
 
-		delta_error = (current_error + self.previous_error) //2  
+		delta_error = current_error - self.previous_error  
 
 		self.previous_error = current_error
 
@@ -113,24 +119,24 @@ class Fuzzy:
 		r_e_high 	= self.triangular_mf(current_error, self.negative[2], self.normal[2], self.positive[2])
 
 		# Membership function for delta_error
-		r_d_low 	= self.triangular_mf(delta_error, self.negative[0], self.normal[0], self.positive[0])
-		r_d_med		= self.triangular_mf(delta_error, self.negative[1], self.normal[1], self.positive[1])
-		r_d_high	= self.triangular_mf(delta_error, self.negative[2], self.normal[2], self.positive[2])
+		r_d_low 	= self.triangular_mf(delta_error, self.d_low[0], self.d_normal[0], self.d_high[0])
+		r_d_med		= self.triangular_mf(delta_error, self.d_low[1], self.d_normal[1], self.d_high[1])
+		r_d_high	= self.triangular_mf(delta_error, self.d_low[2], self.d_normal[2], self.d_high[2])
 
 		# Rule base
 
 		rule_base = [
-			(min(r_e_low, r_d_low), 'fast'),
-			(min(r_e_low, r_d_med), 'normal'),
+			(min(r_e_low, r_d_low), 'slow'),
+			(min(r_e_low, r_d_med), 'slow'),
 			(min(r_e_low, r_d_high), 'slow'),
 
-			(min(r_e_med, r_d_low), 'fast'),
+			(min(r_e_med, r_d_low), 'normal'),
 			(min(r_e_med, r_d_med), 'normal'),
-			(min(r_e_med, r_d_high), 'slow'),
+			(min(r_e_med, r_d_high), 'normal'),
 
 			(min(r_e_high, r_d_low), 'fast'),
-			(min(r_e_high, r_d_med), 'normal'),
-			(min(r_e_high, r_d_high), 'slow')
+			(min(r_e_high, r_d_med), 'fast'),
+			(min(r_e_high, r_d_high), 'fast')
 		]
 		
 		slow = []
@@ -138,7 +144,7 @@ class Fuzzy:
 		fast = []
 
 		for rule in rule_base:
-			print(rule)
+			# print(rule)
 			if rule[1] == "slow":
 				slow.append(rule[0])
 			if rule[1] == "normal":
@@ -158,21 +164,21 @@ class Fuzzy:
 		M3 = self.simson_integral(self.f, point2, point3, inference[1])
 		M4 = self.simson_integral_miring(self.f, point3, point4, [0,self.speed[1]])
 		M5 = self.simson_integral(self.f, point3, point4, inference[2])
-		print("M1 ", M1)
-		print("M2 ", M2)
-		print("M3 ", M3)
-		print("M4 ", M4)
-		print("M5 ", M5)
+		# print("M1 ", M1)
+		# print("M2 ", M2)
+		# print("M3 ", M3)
+		# print("M4 ", M4)
+		# print("M5 ", M5)
 		A1 = self.simson_integral(self.f,0, point1, inference[0], False)
 		A2 = self.simson_integral_miring(self.f, point1, point2, [self.speed[0],0], False)
 		A3 = self.simson_integral(self.f, point2, point3, inference[1], False)
 		A4 = self.simson_integral_miring(self.f, point3, point4, [0,self.speed[1]], False)
 		A5 = self.simson_integral(self.f, point3, point4, inference[2], False)
-		print("A1 ", A1)
-		print("A2 ", A2)
-		print("A3 ", A3)
-		print("A4 ", A4)
-		print("A5 ", A5)
+		# print("A1 ", A1)
+		# print("A2 ", A2)
+		# print("A3 ", A3)
+		# print("A4 ", A4)
+		# print("A5 ", A5)
 
 		numerator = M1+M2+M3+M4+M5
 		denominator = A1+A2+A3+A4+A5
@@ -181,18 +187,18 @@ class Fuzzy:
 		if denominator != 0.0:
 			output = numerator/ denominator
 
-			print(output, "centroid")
+			# print(output, "centroid")
 		
 		# data return
 		ret_error	= 0
-		ret_delta = 0
+		ret_delta 	= 0
 		ret_speed	= 0
 
 
 		if mode:
 			ret_error	= current_error
 			ret_delta 	= delta_error
-			ret_speed	= -output
+			ret_speed	= output
 		else:
 			max_err = error_low
 			ret_error = self.negative[0]
