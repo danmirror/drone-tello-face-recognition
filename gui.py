@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-is_drone = True
-is_face_selection = True
+is_drone = False
+is_face_selection = False
 
 state_running = False
 mode = False
@@ -182,29 +182,29 @@ def Tracking():
             if is_drone :
                 myDrone.clear()
         
-        #top down
-        if info[0][1] != 0:
-            error_ud =  h // 2 -info[0][1] 
+        # #top down
+        # if info[0][1] != 0:
+        #     error_ud =  h // 2 -info[0][1] 
         
-            out_ud, ret_err_ud, ret_average_ud, ret_speed_ud  = fuzzy_ud.update(error_ud, mode)
-            # print(" Output fuzzy ud ", error_ud)
-            # print(" Output fuzzy ret ud ", ret_err_ud)
+        #     out_ud, ret_err_ud, ret_average_ud, ret_speed_ud  = fuzzy_ud.update(error_ud, mode)
+        #     # print(" Output fuzzy ud ", error_ud)
+        #     # print(" Output fuzzy ret ud ", ret_err_ud)
         
-            if is_drone :
-                myDrone.control(0, 0, out_ud, 0)
+        #     if is_drone :
+        #         myDrone.control(0, 0, out_ud, 0)
             
-            y_error_ud = np.append(y_error_ud, ret_err_ud)
-            y_error_ud = np.delete(y_error_ud, 0)
-            y_average_ud = np.append(y_average_ud, ret_average_ud)
-            y_average_ud = np.delete(y_average_ud, 0)
-            y_error_speed_ud = np.append(y_error_speed_ud, ret_speed_ud)
-            y_error_speed_ud = np.delete(y_error_speed_ud, 0)
+        #     y_error_ud = np.append(y_error_ud, ret_err_ud)
+        #     y_error_ud = np.delete(y_error_ud, 0)
+        #     y_average_ud = np.append(y_average_ud, ret_average_ud)
+        #     y_average_ud = np.delete(y_average_ud, 0)
+        #     y_error_speed_ud = np.append(y_error_speed_ud, ret_speed_ud)
+        #     y_error_speed_ud = np.delete(y_error_speed_ud, 0)
 
-        else:
-            # fuzzy_ud.clear()
+        # else:
+        #     # fuzzy_ud.clear()
 
-            if is_drone :
-                myDrone.clear()
+        #     if is_drone :
+        #         myDrone.clear()
 
         img = Image.fromarray(frame)
         imgtk = ImageTk.PhotoImage(image=img)

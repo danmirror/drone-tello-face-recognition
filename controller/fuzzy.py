@@ -1,8 +1,7 @@
 '''
-	Fuzzy logic 
+	Fuzzy logic Mamdani
 	Danu andrean
 	2023
-
 
 ----------------------------
 condition
@@ -12,7 +11,6 @@ condition
 	/    / \  / \    \		
 
        -     0     +
------------------------------
 speed
 ________        __________
 		\  /\  /
@@ -21,6 +19,15 @@ ________        __________
 ________/__\/__\__________
     -50    0    50
 
+inferensi
+                __________
+		   	   /
+		   ___/
+		 /    
+________/     
+    M1  M2 M3 M4  M5
+	
+    -50    0    50
 '''
 
 
@@ -50,66 +57,141 @@ class Fuzzy:
 			return (c - x) / (c - b)
 		else:
 			return 0
+	
+	def f(self, val,z=1):
+		return val * z
+
+	def f_miring(self, val, z1, z2=1):
+		return (z1-val[0])/(val[1]-val[0])*z2
+
+	def simson_integral(self, f, a, b, val, isZ = True, n=100):
+		h = (b-a) / n
+		x = [a+i*h for i in range(n+1)]
+		if isZ:
+			fx = [self.f(val, x[i]) for i in range(n+1)]
+		else:
+			fx = [self.f(val) for i in range(n+1)]
+		
+		integral = fx[0] + fx[n] 	# jumlahkan f(a) dan f(b)
+		for i in range(1, n, 2): 	# loop untuk f ganjil
+			integral += 4 * fx[i]
+		for i in range(2, n-1, 2): 	# loop untuk f genap
+			integral += 2 * fx[i]
+		integral *= h / 3 			# faktor Simson
+
+		return integral
+
+	def simson_integral_miring(self, f, a, b, val, isZ = True, n=100):
+		h = (b-a) / n
+		x = [a+i*h for i in range(n+1)]
+		if isZ :
+			fx = [self.f_miring(val, x[i], x[i]) for i in range(n+1)]
+		else:
+			fx = [self.f_miring(val, x[i]) for i in range(n+1)]
+
+		integral = fx[0] + fx[n] 	# jumlahkan f(a) dan f(b)
+		for i in range(1, n, 2): 	# loop untuk f ganjil
+			integral += 4 * fx[i]
+		for i in range(2, n-1, 2): 	# loop untuk f genap
+			integral += 2 * fx[i]
+		integral *= h / 3 			# faktor Simson
+		
+		return integral
 
 	def update(self, current_error, mode):
+		if(current_error == 0):
+			current_error = 1
 
-		average_error = (current_error + self.previous_error) //2  
+		delta_error = (current_error + self.previous_error) //2  
+
 		self.previous_error = current_error
 
 		# Fuzzyfication
 		# Membership function for error
-		error_low 		= self.triangular_mf(current_error, self.negative[0], self.normal[0], self.positive[0])
-		error_medium 	= self.triangular_mf(current_error, self.negative[1], self.normal[1], self.positive[1])
-		error_high 		= self.triangular_mf(current_error, self.negative[2], self.normal[2], self.positive[2])
+		r_e_low 	= self.triangular_mf(current_error, self.negative[0], self.normal[0], self.positive[0])
+		r_e_med 	= self.triangular_mf(current_error, self.negative[1], self.normal[1], self.positive[1])
+		r_e_high 	= self.triangular_mf(current_error, self.negative[2], self.normal[2], self.positive[2])
 
-		# Membership function for average_error
-		average_negatif = self.triangular_mf(average_error, self.negative[0], self.normal[0], self.positive[0])
-		average_nol		= self.triangular_mf(average_error, self.negative[1], self.normal[1], self.positive[1])
-		average_positif	= self.triangular_mf(average_error, self.negative[2], self.normal[2], self.positive[2])
+		# Membership function for delta_error
+		r_d_low 	= self.triangular_mf(delta_error, self.negative[0], self.normal[0], self.positive[0])
+		r_d_med		= self.triangular_mf(delta_error, self.negative[1], self.normal[1], self.positive[1])
+		r_d_high	= self.triangular_mf(delta_error, self.negative[2], self.normal[2], self.positive[2])
 
 		# Rule base
-		rule_base = [
-			(min(error_low, average_negatif), 'fast'),
-			(min(error_low, average_nol), 'normal'),
-			(min(error_low, average_positif), 'slow'),
-			(min(error_medium, average_negatif), 'fast'),
-			(min(error_medium, average_nol), 'normal'),
-			(min(error_medium, average_positif), 'normal'),
-			(min(error_high, average_negatif), 'normal'),
-			(min(error_high, average_nol), 'slow'),
-			(min(error_high, average_positif), 'slow')
-		]
 
-		# Defuzzification
-		defuzzified_value = 0
-		total_weight = 0
-		for r in rule_base:
-			weight = r[0]
-			if weight > 0:
-				if r[1] == 'slow':
-					defuzzified_value += weight * self.speed[0]
-					total_weight += weight
-				elif r[1] == 'normal':
-					defuzzified_value += weight * 0
-					total_weight += weight
-				elif r[1] == 'fast':
-					defuzzified_value += weight * self.speed[1]
-					total_weight += weight
-				
-		output = 0
-		if not total_weight ==  0:
-			output = int(-(defuzzified_value / total_weight))
+		rule_base = [
+			(min(r_e_low, r_d_low), 'fast'),
+			(min(r_e_low, r_d_med), 'normal'),
+			(min(r_e_low, r_d_high), 'slow'),
+
+			(min(r_e_med, r_d_low), 'fast'),
+			(min(r_e_med, r_d_med), 'normal'),
+			(min(r_e_med, r_d_high), 'slow'),
+
+			(min(r_e_high, r_d_low), 'fast'),
+			(min(r_e_high, r_d_med), 'normal'),
+			(min(r_e_high, r_d_high), 'slow')
+		]
 		
+		slow = []
+		medium = []
+		fast = []
+
+		for rule in rule_base:
+			print(rule)
+			if rule[1] == "slow":
+				slow.append(rule[0])
+			if rule[1] == "normal":
+				medium.append(rule[0])
+			if rule[1] == "fast":
+				fast.append(rule[0])
+
+		inference = [max(slow),max(medium), max(fast)]
+
+		point1 = (inference[0]*(0-self.speed[0])) + self.speed[0]
+		point2 = (inference[1]*(0-self.speed[0])) + self.speed[0]
+		point3 = (inference[1]*(self.speed[1]-0)) + 0
+		point4 = (inference[2]*(self.speed[1]-0)) + 0
+
+		M1 = self.simson_integral(self.f,0, point1, inference[0])
+		M2 = self.simson_integral_miring(self.f, point1, point2, [self.speed[0],0])
+		M3 = self.simson_integral(self.f, point2, point3, inference[1])
+		M4 = self.simson_integral_miring(self.f, point3, point4, [0,self.speed[1]])
+		M5 = self.simson_integral(self.f, point3, point4, inference[2])
+		print("M1 ", M1)
+		print("M2 ", M2)
+		print("M3 ", M3)
+		print("M4 ", M4)
+		print("M5 ", M5)
+		A1 = self.simson_integral(self.f,0, point1, inference[0], False)
+		A2 = self.simson_integral_miring(self.f, point1, point2, [self.speed[0],0], False)
+		A3 = self.simson_integral(self.f, point2, point3, inference[1], False)
+		A4 = self.simson_integral_miring(self.f, point3, point4, [0,self.speed[1]], False)
+		A5 = self.simson_integral(self.f, point3, point4, inference[2], False)
+		print("A1 ", A1)
+		print("A2 ", A2)
+		print("A3 ", A3)
+		print("A4 ", A4)
+		print("A5 ", A5)
+
+		numerator = M1+M2+M3+M4+M5
+		denominator = A1+A2+A3+A4+A5
+		output = 0.0
+
+		if denominator != 0.0:
+			output = numerator/ denominator
+
+			print(output, "centroid")
 		
 		# data return
 		ret_error	= 0
-		ret_average = 0
+		ret_delta = 0
 		ret_speed	= 0
 
 
 		if mode:
 			ret_error	= current_error
-			ret_average = average_error
+			ret_delta 	= delta_error
 			ret_speed	= -output
 		else:
 			max_err = error_low
@@ -121,14 +203,14 @@ class Fuzzy:
 				max_err = error_high
 				ret_error = self.positive[2]
 
-			max_average = error_low
-			ret_average = self.negative[0]
-			if error_medium > max_average:
-				max_average = error_medium
-				ret_average = self.normal[1]
-			if error_high > max_average:
-				max_average = error_high
-				ret_average = self.positive[2]
+			max_delta = error_low
+			ret_delta = self.negative[0]
+			if error_medium > max_delta:
+				max_delta = error_medium
+				ret_delta = self.normal[1]
+			if error_high > max_delta:
+				max_delta = error_high
+				ret_delta = self.positive[2]
 
 			low = (self.speed[1]- self.speed[0])/3
 			if output<= (low+self.speed[0]):
@@ -137,4 +219,4 @@ class Fuzzy:
 				ret_speed = 0
 			if output >self.speed[0]+(low+low):
 				ret_speed = self.speed[1]
-		return output, ret_error, ret_average, ret_speed
+		return output, ret_error, ret_delta, ret_speed
