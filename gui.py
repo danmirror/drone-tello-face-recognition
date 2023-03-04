@@ -74,6 +74,18 @@ def disable():
     positive_input2["state"] = "disabled"
     positive_input3["state"] = "disabled"
 
+    d_negative_input1["state"] = "disabled"
+    d_negative_input2["state"] = "disabled"
+    d_negative_input3["state"] = "disabled"
+
+    d_normal_input1["state"] = "disabled"
+    d_normal_input2["state"] = "disabled"
+    d_normal_input3["state"] = "disabled"
+
+    d_positive_input1["state"] = "disabled"
+    d_positive_input2["state"] = "disabled"
+    d_positive_input3["state"] = "disabled"
+
     rl_input1["state"] = "disabled"
     ud_input1["state"] = "disabled"
     rl_input2["state"] = "disabled"
@@ -93,6 +105,18 @@ def enable():
     positive_input1["state"] = "normal"
     positive_input2["state"] = "normal"
     positive_input3["state"] = "normal"
+
+    d_negative_input1["state"] = "normal"
+    d_negative_input2["state"] = "normal"
+    d_negative_input3["state"] = "normal"
+
+    d_normal_input1["state"] = "normal"
+    d_normal_input2["state"] = "normal"
+    d_normal_input3["state"] = "normal"
+
+    d_positive_input1["state"] = "normal"
+    d_positive_input2["state"] = "normal"
+    d_positive_input3["state"] = "normal"
 
     rl_input1["state"] = "normal"
     ud_input1["state"] = "normal"

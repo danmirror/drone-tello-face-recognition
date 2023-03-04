@@ -70,7 +70,7 @@ class Fuzzy:
 	def f_miring(self, val, z1, z2=1):
 		return (z1-val[0])/(val[1]-val[0])*z2
 
-	def simson_integral(self, f, a, b, val, isZ = True, n=100):
+	def simson_integral(self, f, a, b, val, isZ = True, n=10):
 		h = (b-a) / n
 		x = [a+i*h for i in range(n+1)]
 		if isZ:
@@ -87,7 +87,7 @@ class Fuzzy:
 
 		return integral
 
-	def simson_integral_miring(self, f, a, b, val, isZ = True, n=100):
+	def simson_integral_miring(self, f, a, b, val, isZ = True, n=10):
 		h = (b-a) / n
 		x = [a+i*h for i in range(n+1)]
 		if isZ :
@@ -200,22 +200,22 @@ class Fuzzy:
 			ret_delta 	= delta_error
 			ret_speed	= output
 		else:
-			max_err = error_low
+			max_err = r_e_low
 			ret_error = self.negative[0]
-			if error_medium > max_err:
-				max_err = error_medium
+			if r_e_med > max_err:
+				max_err = r_e_med
 				ret_error = self.normal[1]
-			if error_high > max_err:
-				max_err = error_high
+			if r_e_high > max_err:
+				max_err = r_e_high
 				ret_error = self.positive[2]
 
-			max_delta = error_low
+			max_delta = r_e_low
 			ret_delta = self.negative[0]
-			if error_medium > max_delta:
-				max_delta = error_medium
+			if r_e_med > max_delta:
+				max_delta = r_e_med
 				ret_delta = self.normal[1]
-			if error_high > max_delta:
-				max_delta = error_high
+			if r_e_high > max_delta:
+				max_delta = r_e_high
 				ret_delta = self.positive[2]
 
 			low = (self.speed[1]- self.speed[0])/3
