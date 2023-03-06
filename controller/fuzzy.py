@@ -30,6 +30,21 @@ ________/
     -50    0    50
 '''
 
+from threading import Thread
+
+class ThreadWithReturnValue(Thread):
+    def __init__(self, group=None, target=None, name=None, args=(), kwargs=None, *, daemon=None):
+        Thread.__init__(self, group, target, name, args, kwargs, daemon=daemon)
+
+        self._return = None
+
+    def run(self):
+        if self._target is not None:
+            self._return = self._target(*self._args, **self._kwargs)
+
+    def join(self):
+        Thread.join(self)
+        return self._return
 
 class Fuzzy:
 	def __init__(self):
@@ -70,7 +85,7 @@ class Fuzzy:
 	def f_miring(self, val, z1, z2=1):
 		return (z1-val[0])/(val[1]-val[0])*z2
 
-	def simson_integral(self, f, a, b, val, isZ = True, n=10):
+	def simson_integral(self, f, a, b, val, isZ = True, n=1):
 		h = (b-a) / n
 		x = [a+i*h for i in range(n+1)]
 		if isZ:
@@ -85,9 +100,10 @@ class Fuzzy:
 			integral += 2 * fx[i]
 		integral *= h / 3 			# faktor Simson
 
+		# out_queue.put(integral)
 		return integral
 
-	def simson_integral_miring(self, f, a, b, val, isZ = True, n=10):
+	def simson_integral_miring(self, f, a, b, val, isZ = True, n=1):
 		h = (b-a) / n
 		x = [a+i*h for i in range(n+1)]
 		if isZ :
@@ -102,6 +118,7 @@ class Fuzzy:
 			integral += 2 * fx[i]
 		integral *= h / 3 			# faktor Simson
 		
+		# out_queue.put(integral)
 		return integral
 
 	def update(self, current_error, mode):
@@ -159,26 +176,42 @@ class Fuzzy:
 		point3 = (inference[1]*(self.speed[1]-0)) + 0
 		point4 = (inference[2]*(self.speed[1]-0)) + 0
 
-		M1 = self.simson_integral(self.f,0, point1, inference[0])
-		M2 = self.simson_integral_miring(self.f, point1, point2, [self.speed[0],0])
-		M3 = self.simson_integral(self.f, point2, point3, inference[1])
-		M4 = self.simson_integral_miring(self.f, point3, point4, [0,self.speed[1]])
-		M5 = self.simson_integral(self.f, point3, point4, inference[2])
-		# print("M1 ", M1)
-		# print("M2 ", M2)
-		# print("M3 ", M3)
-		# print("M4 ", M4)
-		# print("M5 ", M5)
-		A1 = self.simson_integral(self.f,0, point1, inference[0], False)
-		A2 = self.simson_integral_miring(self.f, point1, point2, [self.speed[0],0], False)
-		A3 = self.simson_integral(self.f, point2, point3, inference[1], False)
-		A4 = self.simson_integral_miring(self.f, point3, point4, [0,self.speed[1]], False)
-		A5 = self.simson_integral(self.f, point3, point4, inference[2], False)
-		# print("A1 ", A1)
-		# print("A2 ", A2)
-		# print("A3 ", A3)
-		# print("A4 ", A4)
-		# print("A5 ", A5)
+
+		t_M1 = ThreadWithReturnValue(target=self.simson_integral, 			args=( self.f, 0, point1, inference[0])) 
+		t_M2 = ThreadWithReturnValue(target=self.simson_integral_miring,	args=( self.f, point1, point2, [self.speed[0],0])) 
+		t_M3 = ThreadWithReturnValue(target=self.simson_integral, 			args=( self.f, point2, point3, inference[1])) 
+		t_M4 = ThreadWithReturnValue(target=self.simson_integral_miring,	args=( self.f, point3, point4, [0,self.speed[1]])) 
+		t_M5 = ThreadWithReturnValue(target=self.simson_integral, 			args=( self.f, 0, point3, point4, inference[2])) 
+	
+		t_A1 = ThreadWithReturnValue(target=self.simson_integral, 			args=(self.f, 0, point1, inference[0], False))
+		t_A2 = ThreadWithReturnValue(target=self.simson_integral_miring,	args=(self.f, point1, point2, [self.speed[0],0], False))
+		t_A3 = ThreadWithReturnValue(target=self.simson_integral, 			args=(self.f, point2, point3, inference[1], False))
+		t_A4 = ThreadWithReturnValue(target=self.simson_integral_miring,	args=(self.f, point3, point4, [0,self.speed[1]], False))
+		t_A5 = ThreadWithReturnValue(target=self.simson_integral, 			args=(self.f, point3, point4, inference[2], False))
+		
+		t_A1.start() 
+		t_A2.start() 
+		t_A3.start() 
+		t_A4.start() 
+		t_A5.start()
+
+		t_M1.start() 
+		t_M2.start() 
+		t_M3.start() 
+		t_M4.start() 
+		t_M5.start()
+
+		M1 = t_M1.join() 
+		M2 = t_M2.join() 
+		M3 = t_M3.join() 
+		M4 = t_M4.join() 
+		M5 = t_M5.join() 
+
+		A1 = t_A1.join() 
+		A2 = t_A2.join() 
+		A3 = t_A3.join() 
+		A4 = t_A4.join() 
+		A5 = t_A5.join() 
 
 		numerator = M1+M2+M3+M4+M5
 		denominator = A1+A2+A3+A4+A5
@@ -187,7 +220,7 @@ class Fuzzy:
 		if denominator != 0.0:
 			output = numerator/ denominator
 
-			# print(output, "centroid")
+		# 	print(output, "centroid")
 		
 		# data return
 		ret_error	= 0
