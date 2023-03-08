@@ -169,7 +169,7 @@ def Tracking():
         imgtk = ImageTk.PhotoImage(image=img)
         label.imgtk = imgtk
         label.configure(image=imgtk, background="#FFFFFF")
-        label.after(1, Tracking)
+        label.after(10, Tracking)
 
 
 
@@ -376,8 +376,8 @@ canvas_ud = FigureCanvasTkAgg(fig_ud, master=win)
 canvas_ud.get_tk_widget().place(x=930, y=340)
 
 # Create an animation object
-rl = FuncAnimation(fig_rl, update_rl, interval=0, blit=True)
-ud = FuncAnimation(fig_ud, update_ud, interval=0, blit=True)
+rl = FuncAnimation(fig_rl, update_rl, interval=500, blit=True)
+ud = FuncAnimation(fig_ud, update_ud, interval=300, blit=True)
 
 
 win.mainloop()
