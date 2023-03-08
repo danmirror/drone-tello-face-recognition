@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-is_drone = False
-is_face_selection = False
+is_drone = True
+is_face_selection = True
 
 state_running = False
 mode = False
@@ -238,7 +238,7 @@ def Tracking():
         imgtk = ImageTk.PhotoImage(image=img)
         label.imgtk = imgtk
         label.configure(image=imgtk, background="#FFFFFF")
-        label.after(1, Tracking)
+        label.after(10, Tracking)
 
 
 
@@ -427,17 +427,17 @@ label_ud.place(x=0 , y=40)
 
 rl_input1 = tk.Entry(frame_speed)
 rl_input1.place(x=70, y=20, width=70)
-rl_input1.insert(0, -50)
+rl_input1.insert(0, -70)
 rl_input2 = tk.Entry(frame_speed)
 rl_input2.place(x=140, y=20, width=70)
-rl_input2.insert(0, 50)
+rl_input2.insert(0, 70)
 
 ud_input1 = tk.Entry(frame_speed)
 ud_input1.place(x=70, y=40, width=70)
-ud_input1.insert(0, -50)
+ud_input1.insert(0, -40)
 ud_input2 = tk.Entry(frame_speed)
 ud_input2.place(x=140, y=40, width=70)
-ud_input2.insert(0, 50)
+ud_input2.insert(0, 40)
 
 ############################### Battery ###############################
 frame_bat =Frame(height = 40,width = 230,bg = "#FFFFFF", padx=5, pady=5)
@@ -534,9 +534,9 @@ canvas_speed = FigureCanvasTkAgg(fig_speed, master=win)
 canvas_speed.get_tk_widget().place(x=930, y=500)
 
 # Create an animation object
-e = FuncAnimation(fig_rl, update_rl, interval=0, blit=True)
-a = FuncAnimation(fig_ud, update_ud, interval=0, blit=True)
-s = FuncAnimation(fig_speed, update_speed, interval=0, blit=True)
+e = FuncAnimation(fig_rl, update_rl, interval=500, blit=True)
+a = FuncAnimation(fig_ud, update_ud, interval=600, blit=True)
+s = FuncAnimation(fig_speed, update_speed, interval=700, blit=True)
 
 
 win.mainloop()

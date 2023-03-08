@@ -215,10 +215,10 @@ class Fuzzy:
 
 		numerator = M1+M2+M3+M4+M5
 		denominator = A1+A2+A3+A4+A5
-		output = 0.0
+		output = 0
 
 		if denominator != 0.0:
-			output = numerator/ denominator
+			output = int(numerator/ denominator)
 
 		# 	print(output, "centroid")
 		
