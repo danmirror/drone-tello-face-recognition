@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-is_drone = True
-is_face_selection = True
+is_drone = False
+is_face_selection = False
 
 state_running = False
 mode = False
@@ -50,41 +50,20 @@ def set_value():
     speed_ud = [int(ud_input1.get()), int(ud_input2.get())]
     speed_rl = [int(rl_input1.get()), int(rl_input2.get())]
 
-    arr_min = [int(negative_input1.get()), int(negative_input2.get()), int(negative_input3.get())]
-    arr_nor = [int(normal_input1.get()), int(normal_input2.get()), int(normal_input3.get())]
-    arr_max = [int(positive_input1.get()), int(positive_input2.get()), int(positive_input3.get())]
-
+    arr_min = [int(negative_input1.get()), int(negative_input2.get())]
+   
     d_arr_min = [int(d_negative_input1.get()), int(d_negative_input2.get()), int(d_negative_input3.get())]
-    d_arr_nor = [int(d_normal_input1.get()), int(d_normal_input2.get()), int(d_normal_input3.get())]
-    d_arr_max = [int(d_positive_input1.get()), int(d_positive_input2.get()), int(d_positive_input3.get())]
 
-    fuzzy_ud.set(arr_min, arr_nor, arr_max, d_arr_min, d_arr_nor, d_arr_max, speed_ud)
-    fuzzy_rl.set(arr_min, arr_nor, arr_max, d_arr_min, d_arr_nor, d_arr_max, speed_rl)
+    fuzzy_ud.set(arr_min, d_arr_min, speed_ud)
+    fuzzy_rl.set(arr_min, d_arr_min, speed_rl)
 
 def disable():
     negative_input1["state"] = "disabled"
     negative_input2["state"] = "disabled"
-    negative_input3["state"] = "disabled"
-
-    normal_input1["state"] = "disabled"
-    normal_input2["state"] = "disabled"
-    normal_input3["state"] = "disabled"
-
-    positive_input1["state"] = "disabled"
-    positive_input2["state"] = "disabled"
-    positive_input3["state"] = "disabled"
 
     d_negative_input1["state"] = "disabled"
     d_negative_input2["state"] = "disabled"
     d_negative_input3["state"] = "disabled"
-
-    d_normal_input1["state"] = "disabled"
-    d_normal_input2["state"] = "disabled"
-    d_normal_input3["state"] = "disabled"
-
-    d_positive_input1["state"] = "disabled"
-    d_positive_input2["state"] = "disabled"
-    d_positive_input3["state"] = "disabled"
 
     rl_input1["state"] = "disabled"
     ud_input1["state"] = "disabled"
@@ -96,27 +75,10 @@ def disable():
 def enable():
     negative_input1["state"] = "normal"
     negative_input2["state"] = "normal"
-    negative_input3["state"] = "normal"
-
-    normal_input1["state"] = "normal"
-    normal_input2["state"] = "normal"
-    normal_input3["state"] = "normal"
-
-    positive_input1["state"] = "normal"
-    positive_input2["state"] = "normal"
-    positive_input3["state"] = "normal"
 
     d_negative_input1["state"] = "normal"
     d_negative_input2["state"] = "normal"
     d_negative_input3["state"] = "normal"
-
-    d_normal_input1["state"] = "normal"
-    d_normal_input2["state"] = "normal"
-    d_normal_input3["state"] = "normal"
-
-    d_positive_input1["state"] = "normal"
-    d_positive_input2["state"] = "normal"
-    d_positive_input3["state"] = "normal"
 
     rl_input1["state"] = "normal"
     ud_input1["state"] = "normal"
@@ -190,8 +152,8 @@ def Tracking():
 
             error_rl =  w // 2 -info[0][0] 
         
-            out_rl, ret_err_rl, ret_average_rl, ret_speed_rl = fuzzy_rl.update(error_rl, mode)
-            # print(" Output fuzzy rl ", error_rl)
+            out_rl, ret_err_rl, ret_average_rl, ret_speed_rl, realvalue = fuzzy_rl.update(error_rl, mode)
+            print(" Output fuzzy rl ", realvalue)
             # print(" Output fuzzy ret rl ", ret_err_rl)
 
             if is_drone :
@@ -210,12 +172,12 @@ def Tracking():
             if is_drone :
                 myDrone.clear()
         
-        #top down
+        # top down
         if info[0][1] != 0:
             error_ud =  h // 2 -info[0][1] 
         
-            out_ud, ret_err_ud, ret_average_ud, ret_speed_ud  = fuzzy_ud.update(error_ud, mode)
-            # print(" Output fuzzy ud ", error_ud)
+            out_ud, ret_err_ud, ret_average_ud, ret_speed_ud, realvalue  = fuzzy_ud.update(error_ud, mode)
+            print(" Output fuzzy ud ", realvalue)
             # print(" Output fuzzy ret ud ", ret_err_ud)
         
             if is_drone :
@@ -327,96 +289,43 @@ y_dis.place(x=30, y=50)
 
 
 ############################### Fuzzy   ###############################
-frame_fuzzy =Frame(height = 100,width = 230,bg = "#FFFFFF", padx=5, pady=5)
+frame_fuzzy =Frame(height = 60,width = 230,bg = "#FFFFFF", padx=5, pady=5)
 frame_fuzzy.place(x= 20, y= 320)
 
 label_fuzzy = ttk.Label(frame_fuzzy, text="Fuzzy", font='Helvetica 12 bold', foreground="#aaaaaa", background ="#FFFFFF")
 label_fuzzy.place(x=0 , y=0)
-label_kp = ttk.Label(frame_fuzzy, text="Negatif", background ="#FFFFFF")
+label_kp = ttk.Label(frame_fuzzy, text="Error", background ="#FFFFFF")
 label_kp.place(x=0 , y=20)
-label_ki = ttk.Label(frame_fuzzy, text="Normal", background ="#FFFFFF")
-label_ki.place(x=0 , y=40)
-label_kd = ttk.Label(frame_fuzzy, text="Positif", background ="#FFFFFF")
-label_kd.place(x=0 , y=60)
 
 negative_input1 = tk.Entry(frame_fuzzy)
 negative_input1.place(x=70, y=20, width=50)
-negative_input1.insert(0, -200)
+negative_input1.insert(0, 0)
 negative_input2 = tk.Entry(frame_fuzzy)
 negative_input2.place(x=120, y=20, width=50)
-negative_input2.insert(0, -150)
-negative_input3 = tk.Entry(frame_fuzzy)
-negative_input3.place(x=170, y=20, width=50)
-negative_input3.insert(0, 0)
-
-normal_input1 = tk.Entry(frame_fuzzy)
-normal_input1.place(x=70, y=40, width=50)
-normal_input1.insert(0, -150)
-normal_input2 = tk.Entry(frame_fuzzy)
-normal_input2.place(x=120, y=40, width=50)
-normal_input2.insert(0, 0)
-normal_input3 = tk.Entry(frame_fuzzy)
-normal_input3.place(x=170, y=40, width=50)
-normal_input3.insert(0, 150)
-
-positive_input1 = tk.Entry(frame_fuzzy)
-positive_input1.place(x=70, y=60, width=50)
-positive_input1.insert(0, 0)
-positive_input2 = tk.Entry(frame_fuzzy)
-positive_input2.place(x=120, y=60, width=50)
-positive_input2.insert(0, 150)
-positive_input3 = tk.Entry(frame_fuzzy)
-positive_input3.place(x=170, y=60, width=50)
-positive_input3.insert(0, 200)
+negative_input2.insert(0, 200)
 
 
-
-frame_fuzzy =Frame(height = 100,width = 230,bg = "#FFFFFF", padx=5, pady=0)
-frame_fuzzy.place(x= 20, y= 420)
+frame_fuzzy =Frame(height = 50,width = 230,bg = "#FFFFFF", padx=5, pady=0)
+frame_fuzzy.place(x= 20, y= 400)
 
 d_label_fuzzy = ttk.Label(frame_fuzzy, text="Delta", font='Helvetica 12 bold', foreground="#aaaaaa", background ="#FFFFFF")
 d_label_fuzzy.place(x=0 , y=0)
-d_label_kp = ttk.Label(frame_fuzzy, text="Negatif", background ="#FFFFFF")
+d_label_kp = ttk.Label(frame_fuzzy, text="Delta Err", background ="#FFFFFF")
 d_label_kp.place(x=0 , y=20)
-d_label_ki = ttk.Label(frame_fuzzy, text="Normal", background ="#FFFFFF")
-d_label_ki.place(x=0 , y=40)
-d_label_kd = ttk.Label(frame_fuzzy, text="Positif", background ="#FFFFFF")
-d_label_kd.place(x=0 , y=60)
 
 d_negative_input1 = tk.Entry(frame_fuzzy)
 d_negative_input1.place(x=70, y=20, width=50)
-d_negative_input1.insert(0, -10)
+d_negative_input1.insert(0, 0)
 d_negative_input2 = tk.Entry(frame_fuzzy)
 d_negative_input2.place(x=120, y=20, width=50)
-d_negative_input2.insert(0, -5)
+d_negative_input2.insert(0, 50)
 d_negative_input3 = tk.Entry(frame_fuzzy)
 d_negative_input3.place(x=170, y=20, width=50)
-d_negative_input3.insert(0, 0)
-
-d_normal_input1 = tk.Entry(frame_fuzzy)
-d_normal_input1.place(x=70, y=40, width=50)
-d_normal_input1.insert(0, -5)
-d_normal_input2 = tk.Entry(frame_fuzzy)
-d_normal_input2.place(x=120, y=40, width=50)
-d_normal_input2.insert(0, 0)
-d_normal_input3 = tk.Entry(frame_fuzzy)
-d_normal_input3.place(x=170, y=40, width=50)
-d_normal_input3.insert(0, 5)
-
-d_positive_input1 = tk.Entry(frame_fuzzy)
-d_positive_input1.place(x=70, y=60, width=50)
-d_positive_input1.insert(0, 0)
-d_positive_input2 = tk.Entry(frame_fuzzy)
-d_positive_input2.place(x=120, y=60, width=50)
-d_positive_input2.insert(0, 5)
-d_positive_input3 = tk.Entry(frame_fuzzy)
-d_positive_input3.place(x=170, y=60, width=50)
-d_positive_input3.insert(0, 10)
-
+d_negative_input3.insert(0, 100)
 
 ############################### Speed   ###############################
 frame_speed =Frame(height = 70,width = 230,bg = "#FFFFFF", padx=5, pady=5)
-frame_speed.place(x= 20, y= 530)
+frame_speed.place(x= 20, y= 470)
 
 label_speed = ttk.Label(frame_speed, text="Speed", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
 label_speed.place(x=0 , y=0)
@@ -427,21 +336,21 @@ label_ud.place(x=0 , y=40)
 
 rl_input1 = tk.Entry(frame_speed)
 rl_input1.place(x=70, y=20, width=70)
-rl_input1.insert(0, -70)
+rl_input1.insert(0, 0)
 rl_input2 = tk.Entry(frame_speed)
 rl_input2.place(x=140, y=20, width=70)
 rl_input2.insert(0, 70)
 
 ud_input1 = tk.Entry(frame_speed)
 ud_input1.place(x=70, y=40, width=70)
-ud_input1.insert(0, -40)
+ud_input1.insert(0, 0)
 ud_input2 = tk.Entry(frame_speed)
 ud_input2.place(x=140, y=40, width=70)
 ud_input2.insert(0, 40)
 
 ############################### Battery ###############################
 frame_bat =Frame(height = 40,width = 230,bg = "#FFFFFF", padx=5, pady=5)
-frame_bat.place(x= 20, y= 610)
+frame_bat.place(x= 20, y= 560)
 label_bat = ttk.Label(frame_bat, text="Battery", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
 label_bat.place(x=0 , y=0)
 
@@ -450,7 +359,7 @@ battery.place(x=70, y=0, width=120)
 
 ############################## select mode ###########################
 frame_mode =Frame(height = 30,width = 230,bg = "#FFFFFF", padx=5, pady=5)
-frame_mode.place(x= 20, y=660)
+frame_mode.place(x= 20, y=610)
 label_mode = ttk.Label(frame_mode, text="Mode", font='Helvetica 12 bold', background="#FFFFFF", foreground="#aaaaaa")
 label_mode.place(x=0 , y=0)
 comb_mode = ttk.Combobox(frame_mode,textvariable=selected_mode, values=["Realtime","Fuzzy"], state="readonly", width=15)

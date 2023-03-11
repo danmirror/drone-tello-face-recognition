@@ -1,35 +1,3 @@
-'''
-	Fuzzy logic Mamdani
-	Danu andrean
-	2023
-
-----------------------------
-condition
-	   /\   /\   /\	
-	  /  \ /  \ /  \	
-	 /    \    \    \	
-	/    / \  / \    \		
-
-       -     0     +
-speed
-________        __________
-		\  /\  /
-		 \/  \/
-		 /\  /\
-________/__\/__\__________
-    -50    0    50
-
-inference
-                __________
-		   	   /
-		   ___/
-		 /    
-________/     
-    M1  M2 M3 M4  M5
-	
-    -50    0    50
-'''
-
 from threading import Thread
 
 class ThreadWithReturnValue(Thread):
@@ -45,23 +13,11 @@ class ThreadWithReturnValue(Thread):
     def join(self):
         Thread.join(self)
         return self._return
-
 class Fuzzy:
 	def __init__(self):
-		self.speed = [1,50]
-		self.error = [0,200]
-		self.delta = [0,50,100]
-		self.previous_error = 0
-
-
-	def set(self, error, delta, speed):
-
-		self.speed = speed
-		self.error = error
-		self.delta = delta
-	
-	def clear(self):
-		self.previous_error = 0
+		self.speed = [500,1200]
+		self.error = [40,80]
+		self.delta = [40,50,60]
 
 	def f_low(self,x):
 		if x>= self.error[1]:
@@ -162,16 +118,8 @@ class Fuzzy:
 		return integral
 
 
-	def update(self , err, mode):
-
-		invers = False
-		if(err < 0):
-			invers = True
-			err = abs(err)
+	def update(self , err, delta):
 		
-		delta  = err - self.previous_error
-		self.previous_error = err
-
 		r_e_low = self.f_low(err)
 		r_e_high = self.f_high(err)
 
@@ -179,35 +127,33 @@ class Fuzzy:
 		r_d_med = self.f_d_med(delta)
 		r_d_high = self.f_d_high(delta)
 
-		# print(err ,delta)
-		# print()
-		# print(r_e_low ,r_e_high)
-		# print(r_d_low, r_d_med, r_d_high)
+		print(r_e_low ,r_e_high)
+		print(r_d_low, r_d_med, r_d_high)
 
 		rule_base = [
 					(min(r_e_low, r_d_low), 'slow'),
 					(min(r_e_low, r_d_med), 'slow'),
-					(min(r_e_low, r_d_high), 'slow'),
+					(min(r_e_low, r_d_high), 'fast'),
 
-					(min(r_e_high, r_d_low), 'fast'),
+					(min(r_e_high, r_d_low), 'slow'),
 					(min(r_e_high, r_d_med), 'fast'),
 					(min(r_e_high, r_d_high), 'fast'),
 				]
 				
 		slow = []
 		fast = []
-		# print()
+		print()
 		for rule in rule_base:
-			# print(rule)
+			print(rule)
 			if rule[1] == "slow":
 				slow.append(rule[0])
 			if rule[1] == "fast":
 				fast.append(rule[0])
 
 		inference = [max(slow), max(fast)]
-		# print()
-		# print(inference)
-		# print()
+		print()
+		print(inference)
+		print()
 
 		t1 = (inference[0]*(self.speed[1]- self.speed[0])) + self.speed[0]
 		t2 = (inference[1]*(self.speed[1]- self.speed[0])) + self.speed[0]
@@ -250,52 +196,10 @@ class Fuzzy:
 		denominator =  (A1 + A2 +A3)
 
 		output = 0
-		realvalue = 0
 
 		if denominator != 0:
 			output = int(numerator/ denominator)
+		print(output)
 
-			#  only smooting for drone
-			realvalue = output
-			output  = output-15
-			if(invers):
-				output = output * -1
-			print(output)
-		
-		# data return
-		ret_error	= 0
-		ret_delta 	= 0
-		ret_speed	= 0
-
-
-		if mode:
-			ret_error	= err
-			ret_delta 	= delta
-			ret_speed	= output
-		else:
-			max_err = r_e_low
-			ret_error = self.negative[0]
-			if r_e_med > max_err:
-				max_err = r_e_med
-				ret_error = self.normal[1]
-			if r_e_high > max_err:
-				max_err = r_e_high
-				ret_error = self.positive[2]
-
-			max_delta = r_e_low
-			ret_delta = self.negative[0]
-			if r_e_med > max_delta:
-				max_delta = r_e_med
-				ret_delta = self.normal[1]
-			if r_e_high > max_delta:
-				max_delta = r_e_high
-				ret_delta = self.positive[2]
-
-			low = (self.speed[1]- self.speed[0])/3
-			if output<= (low+self.speed[0]):
-				ret_speed = self.speed[0]
-			if output > (low+self.speed[0]):
-				ret_speed = 0
-			if output >self.speed[0]+(low+low):
-				ret_speed = self.speed[1]
-		return output, ret_error, ret_delta, ret_speed, realvalue
+fuzz = Fuzzy()
+fuzz.update(50, 58)
