@@ -15,7 +15,7 @@ from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
-is_drone = False
+is_drone = True
 is_face_selection = False
 
 state_running = False
@@ -129,7 +129,7 @@ def Tracking():
             error_rl =  w // 2 -info[0][0] 
             
             out_rl = pid_rl.update(error_rl)
-            # print(" Output pid rl ", out_rl)
+            print(" Output pid rl ", out_rl)
 
             if is_drone :
                 myDrone.control(0, 0, 0, out_rl)
@@ -140,7 +140,7 @@ def Tracking():
             y_error_rl = np.delete(y_error_rl, 0)
 
         else:
-            # pid_rl.clear()
+            pid_rl.clear()
 
             if is_drone :
                 myDrone.clear()
@@ -149,7 +149,7 @@ def Tracking():
         if info[0][1] != 0:
             error_ud =  h // 2 -info[0][1] 
             out_ud = pid_ud.update(error_ud)
-            # print(" Output pid ud ", out_ud)
+            print(" Output pid ud ", out_ud)
             
             if is_drone :
                 myDrone.control(0, 0, out_ud, 0)
@@ -160,7 +160,7 @@ def Tracking():
             y_error_ud = np.delete(y_error_ud, 0)
 
         else:
-            # pid_ud.clear()
+            pid_ud.clear()
 
             if is_drone :
                 myDrone.clear()
@@ -295,7 +295,7 @@ kp_input.place(x=30, y=30, width=80)
 kp_input.insert(0, 0.1)
 ki_input = tk.Entry(frame_pid)
 ki_input.place(x=30, y=60, width=80)
-ki_input.insert(0, 0.02)
+ki_input.insert(0, 0.05)
 kd_input = tk.Entry(frame_pid)
 kd_input.place(x=30, y=90, width=80)
 kd_input.insert(0, 0.05)
@@ -376,8 +376,8 @@ canvas_ud = FigureCanvasTkAgg(fig_ud, master=win)
 canvas_ud.get_tk_widget().place(x=930, y=340)
 
 # Create an animation object
-rl = FuncAnimation(fig_rl, update_rl, interval=500, blit=True)
-ud = FuncAnimation(fig_ud, update_ud, interval=300, blit=True)
+rl = FuncAnimation(fig_rl, update_rl, interval=750, blit=True)
+ud = FuncAnimation(fig_ud, update_ud, interval=640, blit=True)
 
 
 win.mainloop()

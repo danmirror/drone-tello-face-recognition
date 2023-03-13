@@ -16,6 +16,7 @@ class PID:
 		self.kd = 0
 		self.previous_error = 0
 		self.integral = 0
+		self.derivative = 0
 
 	def set(self, kp, ki, kd, speed):
 		self.speed = speed
@@ -26,6 +27,7 @@ class PID:
 	def clear(self):
 		self.previous_error = 0
 		self.integral = 0
+		self.derivative = 0
 
 	def update(self, current_error):
 		self.integral += current_error 
