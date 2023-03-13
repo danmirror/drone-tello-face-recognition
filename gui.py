@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-is_drone = False
+is_drone = True
 is_face_selection = False
 
 state_running = False
@@ -153,7 +153,7 @@ def Tracking():
             error_rl =  w // 2 -info[0][0] 
         
             out_rl, ret_err_rl, ret_average_rl, ret_speed_rl, realvalue = fuzzy_rl.update(error_rl, mode)
-            print(" Output fuzzy rl ", realvalue)
+            print(" Output fuzzy rl ", out_rl)
             # print(" Output fuzzy ret rl ", ret_err_rl)
 
             if is_drone :
@@ -167,7 +167,7 @@ def Tracking():
             y_error_speed_rl = np.delete(y_error_speed_rl, 0)
 
         else:
-            # fuzzy_rl.clear()
+            fuzzy_rl.clear()
 
             if is_drone :
                 myDrone.clear()
@@ -177,7 +177,7 @@ def Tracking():
             error_ud =  h // 2 -info[0][1] 
         
             out_ud, ret_err_ud, ret_average_ud, ret_speed_ud, realvalue  = fuzzy_ud.update(error_ud, mode)
-            print(" Output fuzzy ud ", realvalue)
+            print(" Output fuzzy ud ", out_ud)
             # print(" Output fuzzy ret ud ", ret_err_ud)
         
             if is_drone :
@@ -191,7 +191,7 @@ def Tracking():
             y_error_speed_ud = np.delete(y_error_speed_ud, 0)
 
         else:
-            # fuzzy_ud.clear()
+            fuzzy_ud.clear()
 
             if is_drone :
                 myDrone.clear()
@@ -339,14 +339,14 @@ rl_input1.place(x=70, y=20, width=70)
 rl_input1.insert(0, 0)
 rl_input2 = tk.Entry(frame_speed)
 rl_input2.place(x=140, y=20, width=70)
-rl_input2.insert(0, 70)
+rl_input2.insert(0, 100)
 
 ud_input1 = tk.Entry(frame_speed)
 ud_input1.place(x=70, y=40, width=70)
 ud_input1.insert(0, 0)
 ud_input2 = tk.Entry(frame_speed)
 ud_input2.place(x=140, y=40, width=70)
-ud_input2.insert(0, 40)
+ud_input2.insert(0, 50)
 
 ############################### Battery ###############################
 frame_bat =Frame(height = 40,width = 230,bg = "#FFFFFF", padx=5, pady=5)
@@ -444,7 +444,7 @@ canvas_speed.get_tk_widget().place(x=930, y=500)
 
 # Create an animation object
 e = FuncAnimation(fig_rl, update_rl, interval=500, blit=True)
-a = FuncAnimation(fig_ud, update_ud, interval=600, blit=True)
+d = FuncAnimation(fig_ud, update_ud, interval=600, blit=True)
 s = FuncAnimation(fig_speed, update_speed, interval=700, blit=True)
 
 
